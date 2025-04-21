@@ -1362,7 +1362,14 @@ namespace Dependencies
             if (Source == null)
                 return;
 
-            String SelectedModuleName = Source.GetTreeNodeHeaderName(Dependencies.Properties.Settings.Default.FullPath);
+            
+            String SelectedModuleName = Source.ModuleFilePath;
+            if (string.IsNullOrEmpty(SelectedModuleName))
+            {
+                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to open in explorer.");
+                return;
+            }
+
             String commandParameter = "/select,\"" + SelectedModuleName + "\"";
 
             Process.Start("explorer.exe", commandParameter);
