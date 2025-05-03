@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/wtr5v8ksndbkkqxg?svg=true)](https://ci.appveyor.com/project/lucasg/dependencies)
 
-### [Download here](https://github.com/himeshsameera/Dependencies/releases/download/v2.1.0/Dependencies_v2.1.0_x64.zip)
+### [Download here](https://github.com/himeshsameera/Dependencies/releases/download/v2.2.0/Dependencies_V_2.2.0_x64.zip)
 
 NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/library/ffkc918h.aspx), `Dependencies` needs [Visual C++  Redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed to run properly.
 
