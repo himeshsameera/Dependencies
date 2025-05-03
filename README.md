@@ -17,7 +17,7 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
 
 ## Releases
 
-- v2.2
+- [v2.2.0](https://github.com/himeshsameera/Dependencies/releases/tag/v2.2.0)
   
   - Fixed Issue [#272](https://github.com/lucasg/Dependencies/issues/272). When showing the Import list, missing imports will be shown at the top. 
   - Fixed Issue [#285](https://github.com/lucasg/Dependencies/issues/285) Copying dll files from the dependencies GUI.
@@ -38,7 +38,7 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
   
   * Changes from HimeshSameera repository
   * Fixed some issues with loading .NET dlls (mostly x64 ones) to Dependencies.
-
+  
   Below are releases from the original main Dependancies repository from [lucasg/Dependencies](https://github.com/lucasg/Dependencies)
 
 * [v1.11](https://github.com/lucasg/Dependencies/releases/download/v1.11.1/Dependencies_x64_Release.zip) :
