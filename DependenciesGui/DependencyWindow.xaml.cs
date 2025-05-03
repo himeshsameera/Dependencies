@@ -1349,13 +1349,36 @@ namespace Dependencies
         private void CopyFilePath_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;
-            String SelectedModuleName = Source.GetTreeNodeHeaderName(Dependencies.Properties.Settings.Default.FullPath);
             if (Source == null)
+            {
                 return;
-
+            }
+            String SelectedModuleName = Source.ModuleFilePath;
+            if (string.IsNullOrEmpty(SelectedModuleName))
+            {
+                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to copy.");
+                return;
+            }
             Clipboard.SetText(SelectedModuleName);
         }
 
+        private void CopyFile_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;
+            if (Source == null)
+            {
+                return;
+            }
+            String SelectedModuleName = Source.ModuleFilePath;
+            if (string.IsNullOrEmpty(SelectedModuleName))
+            {
+                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to copy.");
+                return;
+            }
+            System.Collections.Specialized.StringCollection paths = new System.Collections.Specialized.StringCollection();
+            paths.Add(SelectedModuleName);
+            Clipboard.SetFileDropList(paths);
+        }
         private void OpenInExplorer_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;

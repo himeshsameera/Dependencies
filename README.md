@@ -19,7 +19,8 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
 
 - v2.2
   
-  - Fixed Issue #272. When showing the Import list, missing imports will be shown at the top. 
+  - Fixed Issue [#272](https://github.com/lucasg/Dependencies/issues/272). When showing the Import list, missing imports will be shown at the top. 
+  - Fixed Issue [#285](https://github.com/lucasg/Dependencies/issues/285) Copying dll files from the dependencies GUI.
   - Improved resolving dependancies for CLR dlls that use mono cecil
   - Fixed issues with CI system that came up after upgrading to VS2022. Thank you [xiaoweiChen](https://github.com/xiaoweiChen) for the code change [code change](https://github.com/bb107/MemoryModulePP/pull/54/commits/7f37dc56f7b9f799ac11b733153c4ef1d14e71df) which I used as a reference.
 
@@ -37,9 +38,7 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
   
   * Changes from HimeshSameera repository
   * Fixed some issues with loading .NET dlls (mostly x64 ones) to Dependencies.
-    
-    
-  
+
   Below are releases from the original main Dependancies repository from [lucasg/Dependencies](https://github.com/lucasg/Dependencies)
 
 * [v1.11](https://github.com/lucasg/Dependencies/releases/download/v1.11.1/Dependencies_x64_Release.zip) :
