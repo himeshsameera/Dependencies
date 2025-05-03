@@ -17,13 +17,14 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
 
 ## Releases
 
-
-
-- v2.1.1
+- v2.2
+  
+  - Fixed Issue #272. When showing the Import list, missing imports will be shown at the top. 
   - Improved resolving dependancies for CLR dlls that use mono cecil
   - Fixed issues with CI system that came up after upgrading to VS2022. Thank you [xiaoweiChen](https://github.com/xiaoweiChen) for the code change [code change](https://github.com/bb107/MemoryModulePP/pull/54/commits/7f37dc56f7b9f799ac11b733153c4ef1d14e71df) which I used as a reference.
 
 - [v2.1.0](https://github.com/himeshsameera/Dependencies/releases/download/v2.1.0/Dependencies_v2.1.0_x64.zip) :
+  
   - Mearged several pull requests. Following are the fixes,
     - Pull request 266 - Now the root module data is displayed
     - Pull request 269 - No duplicate items in recent menu.
@@ -33,15 +34,26 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
   - Updated code to use VS2022, Platform toolset V143 Windows SDK 10
   - Thank You all the contributors of the pull requests [viruscamp](https://github.com/viruscamp), [wekoil](https://github.com/wekoil) and [DawmosTomie](https://github.com/DawmosTomie). I'll review and merge the other pull requests as the time permits.
 * [v2.0-alpha](https://github.com/himeshsameera/Dependencies/releases/download/V2.0-alpha/Dependencies_V2.0-alpha_x64.zip) :
+  
   * Changes from HimeshSameera repository
   * Fixed some issues with loading .NET dlls (mostly x64 ones) to Dependencies.
+    
+    
+  
+  Below are releases from the original main Dependancies repository from [lucasg/Dependencies](https://github.com/lucasg/Dependencies)
+
 * [v1.11](https://github.com/lucasg/Dependencies/releases/download/v1.11.1/Dependencies_x64_Release.zip) :
+  
   * lots of bugfixes and incremental improvements
   * covid pandemic
+
 * [v1.10](https://github.com/lucasg/Dependencies/releases/download/v1.10/Dependencies_x64_Release.zip) :
+  
   * lots of bugfixes and incremental improvements
   * support of Windows 8.1 apisets parsing
+
 * [v1.9](https://github.com/lucasg/Dependencies/releases/download/v1.9/Dependencies_x64_Release.zip) :
+  
   * Display imports and exports the way Depends.exe does.
   * Added user customization for search folders and working directory
   * Added LLVM demangler to availables symbol demangling
@@ -49,16 +61,25 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
   * F5 can now refresh the analysis
   * Added CLR assembly dependencies enumeration
   * Added a packaging option without Peview.exe (which triggers some AV).
+
 * [v1.8](https://github.com/lucasg/Dependencies/releases/download/v1.8/Dependencies_x64_Release.zip) :
+  
   * Add x86/x64 variants for Dependencies
+
 * [v1.7](https://github.com/lucasg/Dependencies/releases/download/v1.7/Dependencies.zip) :
+  
   * Add CLI tool "dependencies.exe"
+
 * [v1.6](https://github.com/lucasg/Dependencies/releases/download/v1.6/Dependencies.zip) :
+  
   * Add appx packaging
+
 * [v1.5](https://github.com/lucasg/Dependencies/releases/download/v1.5/Dependencies.zip) :
+  
   * Support of Sxs parsing
   * Support of api set schema parsing
   * API and Modules list can be filtered
+
 * [v1.0](https://github.com/lucasg/Dependencies/releases/download/v1.0/Dependencies.zip) -- Initial release
 
 ## Installation and Usage

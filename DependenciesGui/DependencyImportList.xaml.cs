@@ -24,13 +24,35 @@ namespace Dependencies
 		{
 			this.Items.Clear();
 
+			// Collect found and missing imports separately and combine them at the end.
+			// This is to ensure that the missing imports are always at the top of the list.
+			List<DisplayPeImport> missingImports = new List<DisplayPeImport>();
+			List<DisplayPeImport> foundImports = new List<DisplayPeImport>();
+
 			foreach (PeImportDll DllImport in ParentImports)
 			{
 				foreach (var Import in BinaryCache.LookupImports(DllImport, Exports))
 				{
-					this.Items.Add(new DisplayPeImport(Import.Item1, SymPrv, ModuleFilepath, Import.Item2));
+					if (Import.Item2) 
+					{
+						foundImports.Add(new DisplayPeImport(Import.Item1, SymPrv, ModuleFilepath, Import.Item2));
+					}
+					else
+                    {
+                        missingImports.Add(new DisplayPeImport(Import.Item1, SymPrv, ModuleFilepath, Import.Item2));
+                    }
 				}
 			}
+			
+			// Add the missing imports first, then the found imports.
+			foreach (var Import in missingImports)
+            {
+                this.Items.Add(Import);
+            }
+			foreach (var Import in foundImports)
+            {
+                this.Items.Add(Import);
+            }
 		}
 
         public void SetRootImports(List<PeImportDll> Imports, PhSymbolProvider SymPrv, DependencyWindow Dependencies)
