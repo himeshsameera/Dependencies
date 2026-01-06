@@ -45,10 +45,10 @@ PeExport::PeExport(
 	_In_ const PeExport ^ other
 )
 {
-	this->Ordinal = Ordinal;
-	this->ExportByOrdinal = ExportByOrdinal;
-	this->Name = String::Copy(other->Name);
-	this->ForwardedName = String::Copy(other->ForwardedName);
+	this->Ordinal = other->Ordinal;
+	this->ExportByOrdinal = other->ExportByOrdinal;
+	this->Name = other->Name;
+	this->ForwardedName = other->ForwardedName;
 	this->VirtualAddress = other->VirtualAddress;
 }
 
