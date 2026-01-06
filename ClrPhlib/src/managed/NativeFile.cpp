@@ -241,7 +241,7 @@ String^ NativeFile::GetHexString(_In_ uint8_t *Buffer, _In_ size_t BufferSize)
 
     for (ULONG i = 0; i < BufferSize; i++)
     {
-        char hexNumber[2] = {0};
+        char hexNumber[3] = {0};
         sprintf(hexNumber, "%02X", ((unsigned char*)Buffer)[i]);
 
         hexBuffer[2*i] = hexNumber[0];
