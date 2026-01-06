@@ -1,6 +1,7 @@
 #include <UnmanagedSymPrv.h>
 #include <llvm/Demangle/Demangle.h>
 #include <stdlib.h>
+#include <memory>
 #using <System.dll>
 
 extern "C" {
@@ -65,8 +66,8 @@ bool DemumbleDemangleName(
 	char *AsciiUndecoratedName = NULL;
 
 
-	char *DecoratedNameAscii = (char*)malloc(DecoratedNameLen + 1);
-	sprintf_s(DecoratedNameAscii, DecoratedNameLen + 1, "%ws", DecoratedName);
+	auto DecoratedNameAscii = std::make_unique<char[]>(DecoratedNameLen + 1);
+	sprintf_s(DecoratedNameAscii.get(), DecoratedNameLen + 1, "%ws", DecoratedName);
 
 	if ((!UndecoratedName) || (!UndecoratedNameLen)) {
 		return false;
@@ -76,7 +77,7 @@ bool DemumbleDemangleName(
 	NameLen = DecoratedNameLen;
 
 	AsciiUndecoratedName = __cxa_demangle(
-		DecoratedNameAscii,
+		DecoratedNameAscii.get(),
 		NULL,
 		&NameLen,
 		&status
@@ -96,8 +97,6 @@ bool DemumbleDemangleName(
 		*UndecoratedNameLen = NameLen * sizeof(wchar_t);
 	}
 
-	free(DecoratedNameAscii);
-
 	// UNIX-style error code
 	return status == 0;
 }
@@ -116,8 +115,8 @@ bool LLVMItaniumDemangleName(
 	char *AsciiUndecoratedName = NULL;
 
 
-	char *DecoratedNameAscii = (char*)malloc(DecoratedNameLen + 1);
-	sprintf_s(DecoratedNameAscii, DecoratedNameLen + 1, "%ws", DecoratedName);
+	auto DecoratedNameAscii = std::make_unique<char[]>(DecoratedNameLen + 1);
+	sprintf_s(DecoratedNameAscii.get(), DecoratedNameLen + 1, "%ws", DecoratedName);
 
 	if ((!UndecoratedName) || (!UndecoratedNameLen)) {
 		return false;
@@ -127,7 +126,7 @@ bool LLVMItaniumDemangleName(
 	NameLen = DecoratedNameLen;
 
 	AsciiUndecoratedName = llvm::itaniumDemangle(
-		DecoratedNameAscii,
+		DecoratedNameAscii.get(),
 		nullptr,
 		&NameLen,
 		&status
@@ -146,8 +145,6 @@ bool LLVMItaniumDemangleName(
 
 		*UndecoratedNameLen = NameLen * sizeof(wchar_t);
 	}
-	
-	free(DecoratedNameAscii);
 
 	// UNIX-style error code
 	return status == 0;
@@ -167,8 +164,8 @@ bool LLVMMicrosoftDemangleName(
 	char *AsciiUndecoratedName = NULL;
 
 
-	char *DecoratedNameAscii = (char*)malloc(DecoratedNameLen + 1);
-	sprintf_s(DecoratedNameAscii, DecoratedNameLen + 1, "%ws", DecoratedName);
+	auto DecoratedNameAscii = std::make_unique<char[]>(DecoratedNameLen + 1);
+	sprintf_s(DecoratedNameAscii.get(), DecoratedNameLen + 1, "%ws", DecoratedName);
 
 	if ((!UndecoratedName) || (!UndecoratedNameLen)) {
 		return false;
@@ -178,7 +175,7 @@ bool LLVMMicrosoftDemangleName(
 	NameLen = DecoratedNameLen;
 
 	AsciiUndecoratedName = llvm::microsoftDemangle(
-		DecoratedNameAscii,
+		DecoratedNameAscii.get(),
 		nullptr,
 		&NameLen,
 		&status
@@ -197,8 +194,6 @@ bool LLVMMicrosoftDemangleName(
 
 		*UndecoratedNameLen = NameLen * sizeof(wchar_t);
 	}
-
-	free(DecoratedNameAscii);
 
 	// UNIX-style error code
 	return status == 0;
@@ -324,4 +319,3 @@ bool UnmanagedSymPrv::DemangleName(
 	DEMANGLER_DEBUGLOG_ONE(L"Could not demangle \"{0:s}\" properly", DecoratedName);
 	return false;
 }
-
