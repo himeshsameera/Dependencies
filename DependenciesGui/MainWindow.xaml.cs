@@ -95,7 +95,6 @@ namespace Dependencies
 		private SearchFolder SearchFolder;
 
         private bool _Master;
-		private bool _EnableSearchFolderCustomization;
 
 
         #region PublicAPI

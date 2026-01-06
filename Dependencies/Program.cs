@@ -548,7 +548,7 @@ namespace Dependencies
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("[!] Unhandled exception occured while processing \"{1:s}\"", RecursionLevel, Filepath);
+                Console.Error.WriteLine($"[!] Unhandled exception occurred while processing \"{Filepath}\" (level {RecursionLevel})");
                 Console.Error.WriteLine("Stacktrace:\n{0:s}\n", ex.StackTrace);
                 Console.Error.WriteLine("Modules backtrace:");
                 throw new RethrownException(ex);
