@@ -428,77 +428,6 @@ namespace Dependencies
 
 		#endregion Getters
 
-
-		#region Commands 
-		public RelayCommand OpenPeviewerCommand
-        {
-            get
-            {
-                if (_OpenPeviewerCommand == null)
-                {
-                    _OpenPeviewerCommand = new RelayCommand((param) => this.OpenPeviewer((object)param));
-                }
-
-                return _OpenPeviewerCommand;
-            }
-        }
-
-        public bool OpenPeviewer(object Context)
-        {
-            string programPath = Dependencies.Properties.Settings.Default.PeViewerPath;
-            Process PeviewerProcess = new Process();
-
-            if (Context == null)
-            {
-                return false;
-            }
-
-            if (!File.Exists(programPath))
-            {
-                System.Windows.MessageBox.Show(String.Format("{0:s} file could not be found !", programPath));
-                return false;
-            }
-
-            string Filepath = ModuleFilePath;
-            if (Filepath == null)
-            {
-                return false;
-            }
-
-            PeviewerProcess.StartInfo.FileName = String.Format("\"{0:s}\"", programPath);
-            PeviewerProcess.StartInfo.Arguments = String.Format("\"{0:s}\"", Filepath); 
-            return PeviewerProcess.Start();
-        }
-
-        public RelayCommand OpenNewAppCommand
-        {
-            get
-            {
-                if (_OpenNewAppCommand == null)
-                {
-                    _OpenNewAppCommand = new RelayCommand((param) =>
-                    {
-                        string Filepath = ModuleFilePath;
-                        if (Filepath == null)
-                        {
-                            return;
-                        }
-
-                        Process OtherDependenciesProcess = new Process();
-                        OtherDependenciesProcess.StartInfo.FileName = System.Windows.Forms.Application.ExecutablePath;
-                        OtherDependenciesProcess.StartInfo.Arguments = String.Format("\"{0:s}\"", Filepath);
-                        OtherDependenciesProcess.Start();
-                    });
-                }
-
-                return _OpenNewAppCommand;
-            }
-        }
-
-        #endregion // Commands 
-
-        private RelayCommand _OpenPeviewerCommand;
-        private RelayCommand _OpenNewAppCommand;
 		private ModuleTreeViewItem _Parent;
 		private bool _importsVerified;
         private bool _has_child_errors;
@@ -1346,56 +1275,90 @@ namespace Dependencies
             }
         }
 
+        private string CheckModuleFilePath(ExecutedRoutedEventArgs e)
+        {
+            ModuleTreeViewItem source = e.Source as ModuleTreeViewItem;
+            if (source == null)
+            {
+                return null;
+            }
+            return source.ModuleFilePath;
+        }
+
         private void CopyFilePath_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;
-            if (Source == null)
+            string selectedModuleFilePath = CheckModuleFilePath(e);
+            if (string.IsNullOrEmpty(selectedModuleFilePath))
             {
+                MessageBox.Show("No item is selected. Please select a valid item to copy.");
                 return;
             }
-            String SelectedModuleName = Source.ModuleFilePath;
-            if (string.IsNullOrEmpty(SelectedModuleName))
-            {
-                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to copy.");
-                return;
-            }
-            Clipboard.SetText(SelectedModuleName);
+
+            Clipboard.SetDataObject(selectedModuleFilePath, true);
         }
 
         private void CopyFile_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;
-            if (Source == null)
+            string selectedModuleFilePath = CheckModuleFilePath(e);
+            if (string.IsNullOrEmpty(selectedModuleFilePath))
             {
+                MessageBox.Show("No item is selected. Please select a valid item to copy.");
                 return;
             }
-            String SelectedModuleName = Source.ModuleFilePath;
-            if (string.IsNullOrEmpty(SelectedModuleName))
-            {
-                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to copy.");
-                return;
-            }
+
             System.Collections.Specialized.StringCollection paths = new System.Collections.Specialized.StringCollection();
-            paths.Add(SelectedModuleName);
+            paths.Add(selectedModuleFilePath);
             Clipboard.SetFileDropList(paths);
         }
+
         private void OpenInExplorer_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            ModuleTreeViewItem Source = e.Source as ModuleTreeViewItem;
-            if (Source == null)
-                return;
-
-            
-            String SelectedModuleName = Source.ModuleFilePath;
-            if (string.IsNullOrEmpty(SelectedModuleName))
+            string selectedModuleFilePath = CheckModuleFilePath(e);
+            if (string.IsNullOrEmpty(selectedModuleFilePath))
             {
-                System.Windows.MessageBox.Show("No item is selected. Please select a valid item to open in explorer.");
+                MessageBox.Show("No item is selected. Please select a valid item to open in explorer.");
                 return;
             }
 
-            String commandParameter = "/select,\"" + SelectedModuleName + "\"";
-
+            string commandParameter = "/select,\"" + selectedModuleFilePath + "\"";
             Process.Start("explorer.exe", commandParameter);
+        }
+
+        private void OpenPeviewer_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            string selectedModuleFilePath = CheckModuleFilePath(e);
+            if (string.IsNullOrEmpty(selectedModuleFilePath))
+            {
+                MessageBox.Show("No item is selected. Please select a valid item to view in Peviewer.");
+                return;
+            }
+
+            string programPath = Dependencies.Properties.Settings.Default.PeViewerPath;
+            if (!File.Exists(programPath))
+            {
+                MessageBox.Show(String.Format("{0:s} file could not be found !", programPath));
+                return;
+            }
+
+            Process PeviewerProcess = new Process();
+            PeviewerProcess.StartInfo.FileName = String.Format("\"{0:s}\"", programPath);
+            PeviewerProcess.StartInfo.Arguments = String.Format("\"{0:s}\"", selectedModuleFilePath);
+            PeviewerProcess.Start();
+        }
+
+        private void OpenNewApp_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            string selectedModuleFilePath = CheckModuleFilePath(e);
+            if (string.IsNullOrEmpty(selectedModuleFilePath))
+            {
+                MessageBox.Show("No item is selected. Please select a valid item to view in separate application.");
+                return;
+            }
+
+            Process OtherDependenciesProcess = new Process();
+            OtherDependenciesProcess.StartInfo.FileName = System.Windows.Forms.Application.ExecutablePath;
+            OtherDependenciesProcess.StartInfo.Arguments = String.Format("\"{0:s}\"", selectedModuleFilePath);
+            OtherDependenciesProcess.Start();
         }
 
         private void ExpandAllParentNode(ModuleTreeViewItem Item)
