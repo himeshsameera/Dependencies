@@ -151,10 +151,6 @@ namespace Dependencies
                 );
 
                 string WinSxsManifestDir = Path.Combine(WinSxsDir, "Manifests");
-                var RegisteredManifests = Directory.EnumerateFiles(
-                    WinSxsManifestDir,
-                    "*.manifest"
-                );
 
                 string PublicKeyToken = SxsAssembly.Attribute("publicKeyToken").Value;
                 string Name = SxsAssembly.Attribute("name").Value.ToLower();
@@ -193,18 +189,23 @@ namespace Dependencies
 
                     // Manifest filename : {ProcArch}_{Name}_{PublicKeyToken}_{FuzzyVersion}_{Langage}_{some_hash}.manifest
                     Regex ManifestFileNameRegex = new Regex(
-                        String.Format(@"({0:s}_{1:s}_{2:s}_{3:s}\.{4:s}\.({5:s})\.({6:s})_none_([a-fA-F0-9]+))\.manifest",
+                        String.Format(@"({0:s}_{1:s}_{2:s}_{3:s}\.{4:s}\.(\d+)\.(\d+)_none_([a-fA-F0-9]+))\.manifest",
                             ProcessArch, 
                             Name,
                             PublicKeyToken,
                             Major,
-                            Minor,
-                            Build,
-                            Patch
+                            Minor
+                            //Build,
+                            //Patch
                             //Langage,
                             // some hash
                         ), 
                         RegexOptions.IgnoreCase
+                    );
+
+                    var RegisteredManifests = Directory.EnumerateFiles(
+                        WinSxsManifestDir,
+                        $"{ProcessArch}_{Name}_{PublicKeyToken}_{Major}.{Minor}.*.manifest"
                     );
 
                     bool FoundMatch = false;
