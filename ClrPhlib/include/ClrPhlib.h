@@ -201,10 +201,11 @@ namespace Dependencies {
             UnmanagedPE * m_Impl;
 
             // local cache for imports and exports list
-            List<PeImportDll ^>^ m_Imports;
-            List<PeExport ^>^  m_Exports;
-            bool m_ExportsInit;
-            bool m_ImportsInit;
+            Lazy<List<PeImportDll^>^>^ m_Imports;
+            Lazy<List<PeExport^>^>^ m_Exports;
+
+            List<PeExport^>^ GetExportsInternal();
+            List<PeImportDll^>^ GetImportsInternal();
         };
         
     }
