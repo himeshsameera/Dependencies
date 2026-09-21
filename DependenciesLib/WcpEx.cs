@@ -8,13 +8,15 @@ using System.Threading.Tasks;
 
 namespace Dependencies
 {
+    public static class WcpExConstants
+    {
+        public static readonly IReadOnlyCollection<byte> DCMHeader = Array.AsReadOnly(new byte[] { 0x44, 0x43, 0x4d, 0x01 });
+    }
     /// <summary>
     /// Rewrite of https://github.com/smx-smx/wcpex, used to decompress manifest files in WinSxS which start with 'DCM'
     /// </summary>
     public abstract class WcpEx
     {
-        public static readonly byte[] DCMHeader = new byte[] { 0x44, 0x43, 0x4d, 0x01 };
-
         public static byte[] DecompressManifest(byte[] manifestData)
         {
             return Instance.DecompressManifestInner(manifestData);

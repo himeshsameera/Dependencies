@@ -317,10 +317,10 @@ namespace Dependencies
 
             Stream textStream;
 
-            byte[] tryDCM = (byte[])WcpEx.DCMHeader.Clone();
+            byte[] tryDCM = new byte[WcpExConstants.DCMHeader.Count];
             ManifestStream.Read(tryDCM, 0, tryDCM.Length);
             ManifestStream.Seek(0, SeekOrigin.Begin);
-            if (WcpEx.DCMHeader.SequenceEqual(tryDCM))
+            if (WcpExConstants.DCMHeader.SequenceEqual(tryDCM))
             {
                 var orgStream = new MemoryStream();
                 ManifestStream.CopyTo(orgStream);
