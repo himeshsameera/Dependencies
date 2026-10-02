@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Forms;
 using System.Windows.Data;
@@ -113,6 +114,7 @@ namespace Dependencies
 			// TODO : understand how to reliably bind in xaml
 			this.TabControl.InterTabController.InterTabClient = DoNothingInterTabClient;
             this.TabControl.IsEmptyChanged += MainWindow_TabControlIsEmptyHandler;
+            this.TabControl.SelectionChanged += TabControl_SelectionChanged;
 
             this._Master = false;
 			this.DataContext = this;
@@ -141,6 +143,22 @@ namespace Dependencies
             // Update recent files entries
             App.AddToRecentDocuments(Filename);
             PopulateRecentFilesMenuItems();
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedWindow = this.TabControl.SelectedItem as DependencyWindow;
+            if (selectedWindow != null)
+            {
+                var source = selectedWindow.ModulesList.Items;
+                var moduleCountBinding = new System.Windows.Data.Binding(nameof(source.Count));
+                moduleCountBinding.Source = source;
+                this.LoadedModuleCount.SetBinding(TextBlock.TextProperty, moduleCountBinding);
+            }
+            else
+            {
+                BindingOperations.ClearBinding(this.LoadedModuleCount, TextBlock.TextProperty);
+            }
         }
 
         /// <summary>

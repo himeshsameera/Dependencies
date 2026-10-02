@@ -379,6 +379,23 @@ namespace Dependencies
 			}
 		}
 
+        /// <summary>
+        /// Same as one of parents, should not be expanded
+        /// </summary>
+        /// <returns>true, if same as one of parents</returns>
+        public bool IsRecursive()
+        {
+            var node = this;
+            while (node.ParentModule != null)
+            {
+                node = node.ParentModule;
+                if (node == this || node.ModuleFilePath == this.ModuleFilePath)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
 
 		private bool VerifyModuleImports()
 		{
@@ -886,6 +903,11 @@ namespace Dependencies
 
         private void ConstructDependencyTree(ModuleTreeViewItem RootNode, string FilePath, int RecursionLevel = 0)
         {
+            if (RootNode.IsRecursive())
+            {
+                return;
+            }
+
             PE CurrentPE = (Application.Current as App).LoadBinary(FilePath);
 
             if (null == CurrentPE)
@@ -935,31 +957,26 @@ namespace Dependencies
                     ModuleCacheKey ModuleKey = new ModuleCacheKey(NewTreeContext);
 
                     // Newly seen modules
-                    if (!this.ProcessedModulesCache.ContainsKey(ModuleKey))
+                    if (!this.ProcessedModulesCache.TryGetValue(ModuleKey, out var module))
                     {
                         // Missing module "found"
                         if ((NewTreeContext.PeFilePath == null) || !NativeFile.Exists(NewTreeContext.PeFilePath)) 
                         {
 							if (NewTreeContext.IsApiSet)
 							{
-								this.ProcessedModulesCache[ModuleKey] = new ApiSetNotFoundModuleInfo(ModuleName, NewTreeContext.ApiSetModuleName);
+                                module = new ApiSetNotFoundModuleInfo(ModuleName, NewTreeContext.ApiSetModuleName);
 							}
 							else
 							{
-								this.ProcessedModulesCache[ModuleKey] = new NotFoundModuleInfo(ModuleName);
+                                module = new NotFoundModuleInfo(ModuleName);
 							}
-								
                         }
                         else
                         {
-
-
                             if (NewTreeContext.IsApiSet)
                             {
                                 var ApiSetContractModule = new DisplayModuleInfo(NewTreeContext.ApiSetModuleName, NewTreeContext.PeProperties, NewTreeContext.ModuleLocation, NewTreeContext.Flags);
-                                var NewModule = new ApiSetModuleInfo(NewTreeContext.ModuleName, ref ApiSetContractModule);
-
-                                this.ProcessedModulesCache[ModuleKey] = NewModule;
+                                module = new ApiSetModuleInfo(NewTreeContext.ModuleName, ref ApiSetContractModule);
 
                                 if (SettingTreeBehaviour == TreeBuildingBehaviour.DependencyTreeBehaviour.Recursive)
                                 {
@@ -968,29 +985,33 @@ namespace Dependencies
                             }
                             else
                             {
-                                var NewModule = new DisplayModuleInfo(NewTreeContext.ModuleName, NewTreeContext.PeProperties, NewTreeContext.ModuleLocation, NewTreeContext.Flags);
-                                this.ProcessedModulesCache[ModuleKey] = NewModule;
+                                module = new DisplayModuleInfo(NewTreeContext.ModuleName, NewTreeContext.PeProperties, NewTreeContext.ModuleLocation, NewTreeContext.Flags);
 
                                 switch(SettingTreeBehaviour)
                                 {
                                     case TreeBuildingBehaviour.DependencyTreeBehaviour.RecursiveOnlyOnDirectImports:
                                         if ((NewTreeContext.Flags & ModuleFlag.DelayLoad) == 0)
                                         {
-                                            PEProcessingBacklog.Add(new BacklogImport(childTreeNode, NewModule.ModuleName));
+                                            PEProcessingBacklog.Add(new BacklogImport(childTreeNode, module.ModuleName));
                                         }
                                         break;
 
                                     case TreeBuildingBehaviour.DependencyTreeBehaviour.Recursive:
-                                        PEProcessingBacklog.Add(new BacklogImport(childTreeNode, NewModule.ModuleName));
+                                        PEProcessingBacklog.Add(new BacklogImport(childTreeNode, module.ModuleName));
                                         break;
                                 }
                             }
                         }
 
                         // add it to the module list
-                        this.ModulesList.AddModule(this.ProcessedModulesCache[ModuleKey]);
+                        this.ProcessedModulesCache[ModuleKey] = module;
+                        this.ModulesList.AddModule(module);
                     }
-                    
+
+                    childTreeNodeContext.ModuleInfo = new WeakReference(module);
+                    childTreeNode.DataContext = childTreeNodeContext;
+                    childTreeNode.Header = childTreeNode.GetTreeNodeHeaderName(Dependencies.Properties.Settings.Default.FullPath);
+
                     // Since we uniquely process PE, for thoses who have already been "seen",
                     // we set a dummy entry in order to set the "[+]" icon next to the node.
                     // The dll dependencies are actually resolved on user double-click action
@@ -1000,7 +1021,7 @@ namespace Dependencies
 
                     // Some dot net dlls give 0 for GetImports() but they will always have imports
                     // that can be detected using the special CLR dll processing we do. 
-                    if ((NewTreeContext.PeProperties != null)  && 
+                    if (!childTreeNode.IsRecursive() && (NewTreeContext.PeProperties != null)  && 
                     (NewTreeContext.PeProperties.GetImports().Count > 0 || NewTreeContext.PeProperties.IsClrDll()))
                     {
                         ModuleTreeViewItem DummyEntry = new ModuleTreeViewItem();
@@ -1019,9 +1040,6 @@ namespace Dependencies
                     }
 
                     // Add to tree view
-                    childTreeNodeContext.ModuleInfo = new WeakReference(this.ProcessedModulesCache[ModuleKey]);
-                    childTreeNode.DataContext = childTreeNodeContext;
-                    childTreeNode.Header = childTreeNode.GetTreeNodeHeaderName(Dependencies.Properties.Settings.Default.FullPath);
                     RootNode.Items.Add(childTreeNode);
                 }
 
@@ -1192,11 +1210,9 @@ namespace Dependencies
             if (ResolvedModule.Item1 == ModuleSearchStrategy.ApiSetSchema)
                 ModuleFlags |= ModuleFlag.ApiSet;
 
-            ModuleCacheKey ModuleKey = new ModuleCacheKey(ModuleName, ModuleFilepath, ModuleFlags);
-            if (!this.ProcessedModulesCache.ContainsKey(ModuleKey))
+            ModuleCacheKey ModuleKey = new ModuleCacheKey(ModuleName, ModuleFilepath);
+            if (!this.ProcessedModulesCache.TryGetValue(ModuleKey, out var module))
             {
-                DisplayModuleInfo NewModule;
-
                 // apiset resolution are a bit trickier
                 if (ResolvedModule.Item1 == ModuleSearchStrategy.ApiSetSchema)
                 {
@@ -1206,11 +1222,11 @@ namespace Dependencies
                         ResolvedModule.Item1,
                         ModuleFlags
                     );
-                    NewModule = new ApiSetModuleInfo(ModuleName, ref ApiSetContractModule);
+                    module = new ApiSetModuleInfo(ModuleName, ref ApiSetContractModule);
                 }
                 else
                 {
-                    NewModule = new DisplayModuleInfo(
+                    module = new DisplayModuleInfo(
                         ModuleName,
                         ResolvedModule.Item2,
                         ResolvedModule.Item1,
@@ -1219,10 +1235,9 @@ namespace Dependencies
                     
                 }
 
-                this.ProcessedModulesCache[ModuleKey] = NewModule;
-
                 // add it to the module list
-                this.ModulesList.AddModule(this.ProcessedModulesCache[ModuleKey]);
+                this.ProcessedModulesCache[ModuleKey] = module;
+                this.ModulesList.AddModule(module);
             }
 
             return ResolvedModule.Item2;

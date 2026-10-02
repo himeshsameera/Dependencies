@@ -14,8 +14,10 @@ PE::PE(
     this->Filepath = gcnew String(Filepath);
     this->LoadSuccessful = false;
 
-    this->m_ExportsInit = false;
-    this->m_ImportsInit = false;
+    auto getExportsInternal = gcnew System::Func<Collections::Generic::List<PeExport^>^>(this, &PE::GetExportsInternal);
+    this->m_Exports = gcnew System::Lazy<Collections::Generic::List<PeExport^>^>(getExportsInternal, true);
+    auto getImportsInternal = gcnew System::Func<Collections::Generic::List<PeImportDll^>^>(this, &PE::GetImportsInternal);
+    this->m_Imports = gcnew System::Lazy<Collections::Generic::List<PeImportDll^>^>(getImportsInternal, true);
 }
 
 PE::~PE()
@@ -105,14 +107,14 @@ bool PE::InitProperties()
 
 Collections::Generic::List<PeExport^> ^ PE::GetExports()
 {
-    if (m_ExportsInit)
-        return m_Exports;
-
-    m_ExportsInit = true;
-    m_Exports = gcnew Collections::Generic::List<PeExport^>();
-
     if (!LoadSuccessful)
-        return m_Exports;
+        return gcnew Collections::Generic::List<PeExport^>();
+    return m_Exports->Value;
+}
+
+Collections::Generic::List<PeExport^>^ PE::GetExportsInternal()
+{
+    Collections::Generic::List<PeExport^>^ exports = gcnew Collections::Generic::List<PeExport^>();
 
     if (NT_SUCCESS(PhGetMappedImageExports(&m_Impl->m_PvExports, &m_Impl->m_PvMappedImage)))
     {
@@ -122,33 +124,32 @@ Collections::Generic::List<PeExport^> ^ PE::GetExports()
 
 			if (exp)
 			{
-				m_Exports->Add(exp);
+                exports->Add(exp);
 			}
-
         }
     }
 
-    return m_Exports;
+    return exports;
 }
 
 
 Collections::Generic::List<PeImportDll^> ^ PE::GetImports()
 {
-    if (m_ImportsInit)
-        return m_Imports;
-
-    m_ImportsInit = true;
-    m_Imports = gcnew Collections::Generic::List<PeImportDll^>();
-
     if (!LoadSuccessful)
-        return m_Imports;
+        return gcnew Collections::Generic::List<PeImportDll^>();
+    return m_Imports->Value;
+}
+
+Collections::Generic::List<PeImportDll^>^ PE::GetImportsInternal()
+{
+    Collections::Generic::List<PeImportDll^>^ imports = gcnew Collections::Generic::List<PeImportDll^>();
 
     // Standard Imports
     if (NT_SUCCESS(PhGetMappedImageImports(&m_Impl->m_PvImports, &m_Impl->m_PvMappedImage)))
     {
         for (size_t IndexDll = 0; IndexDll< m_Impl->m_PvImports.NumberOfDlls; IndexDll++)
         {
-            m_Imports->Add(gcnew PeImportDll(&m_Impl->m_PvImports, IndexDll));
+            imports->Add(gcnew PeImportDll(&m_Impl->m_PvImports, IndexDll));
         }
     }
 
@@ -157,11 +158,11 @@ Collections::Generic::List<PeImportDll^> ^ PE::GetImports()
     {
         for (size_t IndexDll = 0; IndexDll< m_Impl->m_PvDelayImports.NumberOfDlls; IndexDll++)
         {
-            m_Imports->Add(gcnew PeImportDll(&m_Impl->m_PvDelayImports, IndexDll));
+            imports->Add(gcnew PeImportDll(&m_Impl->m_PvDelayImports, IndexDll));
         }
     }
 
-    return m_Imports;
+    return imports;
 }
 
 

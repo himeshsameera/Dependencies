@@ -13,24 +13,22 @@ namespace Dependencies
 
     public class ModuleCacheKey
     {
-        public ModuleCacheKey(string _Name, string _Filepath, ModuleFlag _Flags = ModuleFlag.NoFlag)
+        public ModuleCacheKey(string _Name, string _Filepath)
         {
-            Name = _Name;
-            Filepath = _Filepath;
-            Flags = _Flags;
+            Name = _Name?.ToLowerInvariant();
+            Filepath = _Filepath?.ToLowerInvariant();
         }
 
         public ModuleCacheKey(ImportContext import)
         {
-            Name = import.ModuleName;
-            Filepath = import.PeFilePath;
-            Flags = import.Flags;
+            Name = import.ModuleName?.ToLowerInvariant();
+            Filepath = import.PeFilePath?.ToLowerInvariant();
         }
 
         // mandatory since ModuleCacheKey is used as a dictionnary key
         public override int GetHashCode()
         {
-            int hashcode = Name.GetHashCode() ^ Flags.GetHashCode();
+            int hashcode = Name.GetHashCode();
 
             if (Filepath != null)
             {
@@ -40,11 +38,16 @@ namespace Dependencies
             return hashcode;
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is ModuleCacheKey key &&
+                   Name == key.Name &&
+                   Filepath == key.Filepath;
+        }
+
         public string Name;
         public string Filepath;
-        public ModuleFlag Flags;
     }
-
 
 
     public class ModulesCache : Dictionary<ModuleCacheKey, DisplayModuleInfo>

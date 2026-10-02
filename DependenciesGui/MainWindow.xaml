@@ -71,8 +71,8 @@
         </Grid.RowDefinitions>
 
         <Menu x:Name="MainMenu"  HorizontalContentAlignment="Stretch" MinHeight="26" Panel.ZIndex="1" Grid.Row="0" VerticalContentAlignment="Top" VerticalAlignment="Top">
-            
-            
+
+
             <MenuItem x:Name="FileItem" Header="_File" Height="25" Width="39" VerticalAlignment="Top" >
                 <MenuItem x:Name="OpenItem" Header="_Open" Height="25" Command="Open" InputGestureText="Ctrl+O" />
                 <Separator Height="3"/>
@@ -124,9 +124,9 @@
             </Grid.ColumnDefinitions>
 
             <Image Source="Images/Dependencies_48px-no-blur.png" Height="48" Width="48" Grid.Column="0"/>
-            
-            
-            
+
+
+
             <TextBlock Grid.Column="2" 
                        TextWrapping="Wrap"
                        VerticalAlignment="Center"
@@ -139,8 +139,8 @@
                 or simply by dragging it into the application.
             </TextBlock>
         </Grid>
-               
-        
+
+
         <!-- dockablz:Layout is part of the main grid =>  Grid.Row="1" -->
         <!-- DependencyWindow does not support being a floating window => IsFloatDropZoneEnabled="False" -->
         <!-- all dragablz controls need to reference  Partition="2AE89D18-F236-4D20-9605-6C03319038E6" in order to dock correctly -->
@@ -156,13 +156,13 @@
                     </dragablz:TabablzControl>
                 </DataTemplate>
             </dockablz:Layout.BranchTemplate>
-            
+
             <!-- a root, named tab control is needed, so when a tab is torn and a new window is created, the new target tab control can be identified -->
             <dragablz:TabablzControl x:Name="TabControl"
                                  Style="{StaticResource DependenciesTabControlStyle}"
                                  InterTabController="{StaticResource DependenciesInterTabController}">
-        
-                
+
+
                 <!--<dragablz:TabablzControl.HeaderSuffixContent>
                     <Grid x:Name="CustomHeaderContainerGrid" 
                           Margin="0,2,2,0">
@@ -181,8 +181,8 @@
                                     Command="Open"
                                     />
                     </Grid>
-                </dragablz:TabablzControl.HeaderSuffixContent>-->            
-           </dragablz:TabablzControl>
+                </dragablz:TabablzControl.HeaderSuffixContent>-->
+            </dragablz:TabablzControl>
 
 
         </dockablz:Layout>
@@ -200,6 +200,13 @@
             <StatusBarItem 
                 x:Name="AppStatusBarMessage">
                 "Welcome to Dependencies !"
+            </StatusBarItem>
+
+            <StatusBarItem HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock>Loaded Modules:&#160;</TextBlock>
+                    <TextBlock x:Name="LoadedModuleCount" Text="0"></TextBlock>
+                </StackPanel>
             </StatusBarItem>
         </StatusBar>
 
