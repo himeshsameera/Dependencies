@@ -53,6 +53,8 @@
                     <RoutedUICommand x:Key="CopyFilePath" Text="Copy File Path" />
                     <RoutedUICommand x:Key="CopyFile" Text="Copy File" />
                     <RoutedUICommand x:Key="OpenInExplorer" Text="Open in File Explorer" />
+                    <RoutedUICommand x:Key="OpenNewApp" Text="View Module in separate application" />
+                    <RoutedUICommand x:Key="OpenPeviewer" Text="View Module in Peviewer"  />
 
                     <ContextMenu x:Key="TreeItemContextMenu">
                         <MenuItem Header="Highlight Matching Module In List" 
@@ -87,16 +89,14 @@
                         <Separator Height="3" Margin="-1,0,0,0"/>
 
                         <MenuItem Header="View Module in separate application" 
-                                Command="{Binding  Path=OpenNewAppCommand, RelativeSource={RelativeSource AncestorLevel=1,AncestorType=TreeViewItem,Mode=FindAncestor}}"
-                                CommandParameter ="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1,AncestorType=Grid,Mode=FindAncestor}}"
-                                InputGestureText="Alt+Enter"  
-                                IsEnabled="True" />
+                                Command="{StaticResource OpenNewApp}"
+                                InputGestureText="Alt+Enter" 
+                                IsEnabled="True"  />
 
                         <MenuItem Header="View Module in Peviewer" 
-                                Command="{Binding  Path=OpenPeviewerCommand, RelativeSource={RelativeSource AncestorLevel=1,AncestorType=TreeViewItem,Mode=FindAncestor}}"
-                                CommandParameter ="{Binding DataContext, RelativeSource={RelativeSource AncestorLevel=1,AncestorType=Grid,Mode=FindAncestor}}"
-                                InputGestureText="Alt+Enter"  
-                                IsEnabled="True" />
+                                Command="{StaticResource OpenPeviewer}"
+                                InputGestureText="Alt+Enter" 
+                                IsEnabled="True"  />
 
                         <!--AncestorType=Grid To get the current context feel like magic to me -->
                     </ContextMenu>
@@ -186,6 +186,8 @@
                     <CommandBinding Command="{StaticResource CopyFilePath}" Executed="CopyFilePath_Executed"/>
                     <CommandBinding Command="{StaticResource CopyFile}" Executed="CopyFile_Executed"/>
                     <CommandBinding Command="{StaticResource OpenInExplorer}" Executed="OpenInExplorer_Executed"/>
+                    <CommandBinding Command="{StaticResource OpenNewApp}" Executed="OpenNewApp_Executed"/>
+                    <CommandBinding Command="{StaticResource OpenPeviewer}" Executed="OpenPeviewer_Executed"/>
                 </TreeView.CommandBindings>
             </TreeView>
             
