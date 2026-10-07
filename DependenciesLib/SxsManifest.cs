@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Xml;
 using System.Xml.Linq;
@@ -144,24 +145,11 @@ namespace Dependencies
             // 0. find publisher manifest in %WINDIR%/WinSxs/Manifest
             if (SxsAssembly.Attribute("publicKeyToken") != null)
             {
-
-                string WinSxsDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    "WinSxs"
-                );
-
-                string WinSxsManifestDir = Path.Combine(WinSxsDir, "Manifests");
-                var RegisteredManifests = Directory.EnumerateFiles(
-                    WinSxsManifestDir,
-                    "*.manifest"
-                );
-
                 string PublicKeyToken = SxsAssembly.Attribute("publicKeyToken").Value;
                 string Name = SxsAssembly.Attribute("name").Value.ToLower();
                 string ProcessArch = SxsAssembly.Attribute("processorArchitecture") != null ? SxsAssembly.Attribute("processorArchitecture").Value : "*";
                 string Version = SxsAssembly.Attribute("version").Value;
-                string Langage = SxsAssembly.Attribute("langage") != null ? SxsAssembly.Attribute("langage").Value : "none"; // TODO : support localized sxs redirection
-                
+                string Langage = SxsAssembly.Attribute("langage") != null ? SxsAssembly.Attribute("langage").Value : "neutral"; // TODO : support localized sxs redirection
 
                 switch (ProcessArch.ToLower())
                 {
@@ -181,91 +169,30 @@ namespace Dependencies
                         break;
                 }
 
-                Regex VersionRegex = new Regex(@"([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)", RegexOptions.IgnoreCase);
-                Match VersionMatch = VersionRegex.Match(Version);
-
-                if (VersionMatch.Success)
+                if (System.Version.TryParse(Version, out var sysVer))
                 {
-                    string Major = VersionMatch.Groups[1].Value;
-                    string Minor = VersionMatch.Groups[2].Value;
-                    string Build = (VersionMatch.Groups[3].Value == "0") ? ".*" : VersionMatch.Groups[3].Value;
-                    string Patch = (VersionMatch.Groups[4].Value == "0") ? ".*" : VersionMatch.Groups[4].Value;
+                    var foundPathes = SxsSearcher.GetMatchPathes(true, true, ProcessArch, Name, PublicKeyToken, sysVer.Major, sysVer.Minor, Langage);
 
-                    // Manifest filename : {ProcArch}_{Name}_{PublicKeyToken}_{FuzzyVersion}_{Langage}_{some_hash}.manifest
-                    Regex ManifestFileNameRegex = new Regex(
-                        String.Format(@"({0:s}_{1:s}_{2:s}_{3:s}\.{4:s}\.({5:s})\.({6:s})_none_([a-fA-F0-9]+))\.manifest",
-                            ProcessArch, 
-                            Name,
-                            PublicKeyToken,
-                            Major,
-                            Minor,
-                            Build,
-                            Patch
-                            //Langage,
-                            // some hash
-                        ), 
-                        RegexOptions.IgnoreCase
-                    );
-
-                    bool FoundMatch = false;
-                    int HighestBuild = 0;
-                    int HighestPatch = 0;
-                    string MatchSxsManifestDir = "";
-                    string MatchSxsManifestPath = "";
-
-                    foreach (var FileName in RegisteredManifests)
+                    if (foundPathes.Count > 0)
                     {
-                        Match MatchingSxsFile = ManifestFileNameRegex.Match(FileName);
-                        if (MatchingSxsFile.Success)
-                        {
-                            
-                            int MatchingBuild = Int32.Parse(MatchingSxsFile.Groups[2].Value);
-                            int MatchingPatch = Int32.Parse(MatchingSxsFile.Groups[3].Value);
+                        var fullManifestFile = foundPathes[0];
+                        var sxsName = Path.GetFileNameWithoutExtension(fullManifestFile);
 
-                            if ((MatchingBuild > HighestBuild) || ((MatchingBuild == HighestBuild) && (MatchingPatch > HighestPatch)))
-                            {
-                                
-                                
-                                string TestMatchSxsManifestDir = MatchingSxsFile.Groups[1].Value;
-
-                                // Check the directory exists before confirming there is a match
-                                string FullPathMatchSxsManifestDir = Path.Combine(WinSxsDir, TestMatchSxsManifestDir);
-                                //Debug.WriteLine("FullPathMatchSxsManifestDir : Checking {0:s}", FullPathMatchSxsManifestDir);
-                                if (NativeFile.Exists(FullPathMatchSxsManifestDir, true))
-                                {
-
-                                    //Debug.WriteLine("FullPathMatchSxsManifestDir : Checking {0:s} TRUE", FullPathMatchSxsManifestDir);
-                                    FoundMatch = true;
-
-                                    HighestBuild = MatchingBuild;
-                                    HighestPatch = MatchingPatch;
-
-                                    MatchSxsManifestDir = TestMatchSxsManifestDir;
-                                    MatchSxsManifestPath = Path.Combine(WinSxsManifestDir, FileName);
-                                }
-                            }
-                        }
-                    }
-
-                    if (FoundMatch)
-                    {
-                        
-                        string FullPathMatchSxsManifestDir = Path.Combine(WinSxsDir, MatchSxsManifestDir);
+                        string sxsContentDir = Path.Combine(SxsSearcher.WinSxsDir, sxsName);
 
                         // "{name}.local" local sxs directory hijack ( really used for UAC bypasses )
                         if (ExecutableName != "")
                         {
                             string LocalSxsDir = Path.Combine(Folder, String.Format("{0:s}.local", ExecutableName));
-                            string MatchingLocalSxsDir = Path.Combine(LocalSxsDir, MatchSxsManifestDir);
+                            string MatchingLocalSxsDir = Path.Combine(LocalSxsDir, sxsName);
 
                             if (Directory.Exists(LocalSxsDir) && Directory.Exists(MatchingLocalSxsDir))
                             {
-                                FullPathMatchSxsManifestDir = MatchingLocalSxsDir;
+                                sxsContentDir = MatchingLocalSxsDir;
                             }
                         }
 
-
-                        return ExtractDependenciesFromSxsManifestFile(MatchSxsManifestPath, FullPathMatchSxsManifestDir, ExecutableName, ProcessorArch);
+                        return ExtractDependenciesFromSxsManifestFile(fullManifestFile, sxsContentDir, ExecutableName, ProcessorArch);
                     }
                 }
             }
@@ -388,10 +315,24 @@ namespace Dependencies
             nsmgr.AddNamespace("asmv3", "http://schemas.microsoft.com/SMI/2005/WindowsSettings");      // sometimes missing from manifests : V3
             XmlParserContext context = new XmlParserContext(null, nsmgr, null, XmlSpace.Preserve);
 
+            Stream textStream;
 
-            
-            
-            using (StreamReader xStream = new StreamReader(ManifestStream))
+            byte[] tryDCM = new byte[WcpExConstants.DCMHeader.Count];
+            ManifestStream.Read(tryDCM, 0, tryDCM.Length);
+            ManifestStream.Seek(0, SeekOrigin.Begin);
+            if (WcpExConstants.DCMHeader.SequenceEqual(tryDCM))
+            {
+                var orgStream = new MemoryStream();
+                ManifestStream.CopyTo(orgStream);
+                var decompressed = WcpEx.DecompressManifest(orgStream.ToArray());
+                textStream = new MemoryStream(decompressed);
+            }
+            else
+            {
+                textStream = ManifestStream;
+            }
+
+            using (StreamReader xStream = new StreamReader(textStream))
             {
                 // Trim double quotes in manifest attributes
                 // Example :

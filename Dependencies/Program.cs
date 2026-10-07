@@ -732,7 +732,15 @@ namespace Dependencies
             Printer(Manifest);
         }
 
-		public static void DumpSxsEntries(PE Application, Action<IPrettyPrintable> Printer, int recursion_depth= 0)
+        public static void DecompressManifest(string filename)
+        {
+            var indata = File.ReadAllBytes(filename);
+            var outdata = WcpEx.DecompressManifest(indata);
+            string xml = System.Text.Encoding.UTF8.GetString(outdata);
+            Console.WriteLine(xml);
+        }
+
+        public static void DumpSxsEntries(PE Application, Action<IPrettyPrintable> Printer, int recursion_depth= 0)
         {
             SxsDependencies SxsDeps = new SxsDependencies(Application);
             Printer(SxsDeps);
@@ -794,6 +802,7 @@ namespace Dependencies
 				"  -depth : limit recursion depth when analysing loaded modules or dependency chain. Default value is infinite.",
                 "  -apisets : dump the system's ApiSet schema (api set dll -> host dll)",
                 "  -apisetsdll : dump the ApiSet schema from apisetschema <FILE> (api set dll -> host dll)",
+                "  -wcpex : decompress DCM manifest",
                 "  -knowndll : dump all the system's known dlls (x86 and x64)",
                 "  -manifest : dump <FILE> embedded manifest, if it exists.",
                 "  -sxsentries : dump all of <FILE>'s sxs dependencies.",
@@ -837,6 +846,7 @@ namespace Dependencies
 							{ "d|depth=",  "limit recursion depth when analysing loaded modules or dependency chain. Default value is infinite", (int v) =>  recursion_depth = v },
 							{ "knowndll", "List all known dlls", v => { DumpKnownDlls(GetObjectPrinter(export_as_json));  early_exit = true; } },
 							{ "apisets", "List apisets redirections", v => { DumpApiSets(GetObjectPrinter(export_as_json));  early_exit = true; } },
+                            { "wcpex=", "Decompress DCM manifest", v => { DecompressManifest(v);  early_exit = true; } },
                             { "apisetsdll", "List apisets redirections from apisetschema <FILE>", v => command = DumpApiSets },
                             { "manifest", "show manifest information embedded in <FILE>", v => command = DumpManifest },
                             { "sxsentries", "dump all of <FILE>'s sxs dependencies", v => command = DumpSxsEntries },
