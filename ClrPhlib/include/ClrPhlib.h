@@ -165,6 +165,7 @@ namespace Dependencies {
 
             // return the processorArchiture of PE
             String^ GetProcessor();
+            bool CheckProcessor(String^ ProcessorArch);
 
             // Return the ApiSetSchema
             ApiSetSchema^ GetApiSetSchema();
