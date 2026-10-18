@@ -73,6 +73,7 @@ namespace Dependencies
 
     public class SxsEntries : List<SxsEntry> 
     {
+        public bool HasError = false;
         public static SxsEntries FromSxsAssembly(XElement SxsAssembly, XNamespace Namespace, string Folder)
         {
             SxsEntries Entries =  new SxsEntries();
@@ -371,12 +372,20 @@ namespace Dependencies
             string OverridingManifest = String.Format("{0:s}.manifest", Pe.Filepath);
             if (File.Exists(OverridingManifest))
             {
-                return ExtractDependenciesFromSxsManifestFile(
-                    OverridingManifest,
-                    RootPeFolder,
-                    RootPeFilename,
-                    Pe.GetProcessor()
-                );
+                try
+                {
+                    return ExtractDependenciesFromSxsManifestFile(
+                        OverridingManifest,
+                        RootPeFolder,
+                        RootPeFilename,
+                        Pe.GetProcessor()
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Entries.HasError = true;
+                    return Entries;
+                }
             }
 
             // Retrieve embedded manifest

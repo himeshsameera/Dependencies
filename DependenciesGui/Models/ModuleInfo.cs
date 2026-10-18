@@ -27,6 +27,7 @@ public enum ModuleFlag
 	NotFound = 0x10,
     MissingImports = 0x20,
     ChildrenError = 0x40,
+    SXSManifestError = 0x80,
 }
 
 namespace Dependencies
@@ -349,6 +350,11 @@ namespace Dependencies
                 if ((this.Flags & ModuleFlag.ChildrenError) != 0)
                 {
                     return String.Format("{0:s} module has an erroneous child module", this.Filepath);
+                }
+
+                if ((this.Flags & ModuleFlag.SXSManifestError) != 0)
+                {
+                    return String.Format("{0:s} module has an erroneous manifest file", this.Filepath);
                 }
 
                 return String.Format("{0:s} module loaded correctly", this.Filepath); ;

@@ -233,6 +233,11 @@ namespace Dependencies
         public void PrettyPrint()
         {
             Console.WriteLine("[-] sxs dependencies for executable : {0}", Application.Filepath);
+            if(SxS.HasError)
+            {
+                Console.WriteLine("[x] Error while parsing sxs dependencies for executable : {0}", Application.Filepath);
+                return;
+            }
             foreach (var entry in SxS)
             {
                 if (entry.Path.Contains("???"))

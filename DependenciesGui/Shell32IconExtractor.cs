@@ -155,6 +155,11 @@ namespace Dependencies
                 return "Images/InvalidOverlay.png";
             }
 
+            if ((Flags & ModuleFlag.SXSManifestError) != 0)
+            {
+                return "Images/InvalidOverlay.png";
+            }
+
             bool ClrAssembly = (Flags & ModuleFlag.ClrReference) != 0;
             if (ClrAssembly)
             {

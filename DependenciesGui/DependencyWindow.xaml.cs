@@ -530,7 +530,12 @@ namespace Dependencies
             this.ModulesList.ConfigureSearchOrderCommand = ConfigureSearchOrderCommand;
 
             var RootFilename = Path.GetFileName(this.Filename);
-            var RootModule = new DisplayModuleInfo(RootFilename, this.Pe, ModuleSearchStrategy.ROOT);
+            ModuleFlag flag  = (ModuleFlag)0;
+            if (SxsEntriesCache.HasError) 
+            {
+                flag |= ModuleFlag.SXSManifestError;
+            }
+            var RootModule = new DisplayModuleInfo(RootFilename, this.Pe, ModuleSearchStrategy.ROOT, flag);
             this.ProcessedModulesCache.Add(new ModuleCacheKey(RootFilename, this.Filename), RootModule);
             this.ModulesList.AddModule(RootModule);
 
