@@ -17,7 +17,19 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
 
 ## Releases
 
-- [v2.2.0](https://github.com/himeshsameera/Dependencies/releases/tag/v2.2.0)
+- [v2.3.0](https://github.com/himeshsameera/Dependencies/releases/tag/v2.3.0) :
+  
+  - Mearged several pull requests. Following are the fixes,
+    - Pull request 7 - feature: show file extension in tab header
+    - Pull request 9 - fix: make WinSxS search correct and much faster
+    - Pull request 10 - make "Expand All" work.
+    - Pull request 11 - fix some XAML binding fails
+    - Pull request 12 - fix: treenode context menus may use last selected item
+	- Pull request [#195](https://github.com/lucasg/Dependencies/pull/195) - Support for Arm64
+  - Fixed Issue [#13](https://github.com/himeshsameera/Dependencies/issues/13) Exception handelling for sxs manifest reading.
+  - Thank You [viruscamp](https://github.com/viruscamp) [Seongjae Park](https://github.com/sj6219) for the pull requests.
+
+- [v2.2.0](https://github.com/himeshsameera/Dependencies/releases/download/v2.2.0/Dependencies_v2.2.0_x64.zip)
   
   - Fixed Issue [#272](https://github.com/lucasg/Dependencies/issues/272). When showing the Import list, missing imports will be shown at the top. 
   - Fixed Issue [#285](https://github.com/lucasg/Dependencies/issues/285) Copying dll files from the dependencies GUI.
