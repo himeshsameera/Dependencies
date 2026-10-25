@@ -4,7 +4,7 @@
 
 ### [Download here](https://github.com/himeshsameera/Dependencies/releases/download/v2.3.0/Dependencies_v2.3.0_x64.zip)
 
-NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/library/ffkc918h.aspx), `Dependencies` needs [Visual C++  Redistributable](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) installed to run properly.
+NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/library/ffkc918h.aspx), `Dependencies` needs [Visual C++  Redistributable](https://aka.ms/vc14/vc_redist.x64.exe) installed to run properly.
 
 <p align="center">
 <img alt="Usage Exemple" src="screenshots/UsageExemple.gif"/>
@@ -25,7 +25,7 @@ NB : due to [limitations on /clr compilation](https://msdn.microsoft.com/en-us/l
     - Pull request 10 - make "Expand All" work.
     - Pull request 11 - fix some XAML binding fails
     - Pull request 12 - fix: treenode context menus may use last selected item
-	- Pull request [#195](https://github.com/lucasg/Dependencies/pull/195) - Support for Arm64
+    - Pull request [#195](https://github.com/lucasg/Dependencies/pull/195) - Support for Arm64
   - Fixed Issue [#13](https://github.com/himeshsameera/Dependencies/issues/13) Exception handling for sxs manifest reading.
   - Thank You [viruscamp](https://github.com/viruscamp) [Seongjae Park](https://github.com/sj6219) for the pull requests.
 
