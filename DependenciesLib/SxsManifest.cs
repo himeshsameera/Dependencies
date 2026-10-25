@@ -351,6 +351,9 @@ namespace Dependencies
                 // Remove blank lines
                 PeManifest = Regex.Replace(PeManifest, @"^\s+$[\r\n]*", string.Empty, RegexOptions.Multiline);
 
+                // Remove leading whitespaces
+                PeManifest = PeManifest.TrimStart();
+
                 using (XmlTextReader xReader = new XmlTextReader(PeManifest, XmlNodeType.Document, context))
                 {
                     XmlManifest = XDocument.Load(xReader);
