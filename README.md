@@ -34,4 +34,4 @@ winget install -e --id lucasg.Dependencies
 * `Recursive`: Full recursive analysis. Very resource hungry.
 
 ## How to build
-Open the `Dependencies.sln` using Visual Studio. Select `x64` or `x86` solution platform (not `Any CPU`)
+Open the `Dependencies.slnx` using Visual Studio 2026.
