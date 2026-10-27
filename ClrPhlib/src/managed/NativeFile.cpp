@@ -155,7 +155,7 @@ CleanupExit:
 }
 
 
-bool NativeFile::HashBuffer(_In_ uint8_t *Buffer, _In_ size_t BufferSize, _In_ wchar_t *HASH_ALGORITHM, _Outptr_ void **Hash, _Out_ size_t *HashSize)
+bool NativeFile::HashBuffer(_In_ uint8_t *Buffer, _In_ size_t BufferSize, _In_ const wchar_t *HASH_ALGORITHM, _Outptr_ void **Hash, _Out_ size_t *HashSize)
 {
 	
 	NTSTATUS status;
