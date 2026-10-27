@@ -36,6 +36,11 @@ Function BuildAndTest($configuration, $platform) {
           $root/Dependencies.slnx
   CheckReturnCodeOfPreviousCommand "build failed"
 
+  if ($platform -eq 'ARM64' -and -not $isArm64Host) {
+    Info "ARM64 cross-build complete. Running these tests requires an ARM64 Windows host."
+    return
+  }
+
   Info "Run 'dotnet test' $configuration $platform"
   dotnet test --nologo `
               --no-build `
@@ -54,8 +59,8 @@ $ProgressPreference = "SilentlyContinue"
 
 $root = Resolve-Path "$PSScriptRoot"
 $buildDir = "$root/build"
-$publishDir = "$buildDir/Publish"
 $version = GetVersion
+$isArm64Host = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture -eq 'Arm64'
 
 Info "Version: '$version'"
 
@@ -63,13 +68,16 @@ Info "Open Visual Studio Developer PowerShell"
 
 $vswhereCommand = Get-Command -Name "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 $installationPath = & $vswhereCommand -prerelease -latest -property installationPath
-& "$installationPath\Common7\Tools\Launch-VsDevShell.ps1" -SkipAutomaticLocation -Arch x64 -HostArch x64
+& "$installationPath\Common7\Tools\Launch-VsDevShell.ps1" -SkipAutomaticLocation
 
 BuildAndTest Release x64
 BuildAndTest Debug x64
 
 BuildAndTest Release x86
 BuildAndTest Debug x86
+
+BuildAndTest Release ARM64
+BuildAndTest Debug ARM64
 
 Info "Download Process Hacker binaries"
 $processHackerDir = "$buildDir/processhacker-2.39-bin"
@@ -78,11 +86,13 @@ Invoke-WebRequest -Uri "https://sourceforge.net/projects/processhacker/files/pro
                   -OutFile "$processHackerDir.zip"
 Expand-Archive -LiteralPath "$processHackerDir.zip" -DestinationPath $processHackerDir -Force
 
-foreach ($platform in @("x64", "x86")) {
+foreach ($platform in @("x64", "x86", "ARM64")) {
   $archiveName = "$buildDir/dependencies_v${version}_$platform.zip"
   Info "Create zip archive '$archiveName'"
+  # PE Viewer runs as a separate process; use its x64 build under ARM64 emulation.
+  $peViewerPlatform = if ($platform -eq 'ARM64') { 'x64' } else { $platform }
   $files = @(Get-ChildItem -Path "$buildDir/$platform/Release/DependenciesGui/*" -File -Exclude "*.pdb"
-             Get-Item -LiteralPath "$processHackerDir/$platform/peview.exe")
+             Get-Item -LiteralPath "$processHackerDir/$peViewerPlatform/peview.exe")
   Compress-Archive -LiteralPath $files.FullName `
                    -DestinationPath $archiveName `
                    -Force

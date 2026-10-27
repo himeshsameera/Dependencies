@@ -16,7 +16,7 @@ extern "C" {
 #define DEMANGLER_DEBUGLOG_ONE (DemanglerDebugOneArg)
 #define DEMANGLER_DEBUGLOG_TWO (DemanglerDebugTwoArg)
 
-void DemanglerDebugOneArg(wchar_t *Format, wchar_t *Arg0)
+void DemanglerDebugOneArg(const wchar_t *Format, const wchar_t *Arg0)
 {
 	if (!DEMANGLER_DEBUGLOG_ON)
 		return;
@@ -33,7 +33,7 @@ void DemanglerDebugOneArg(wchar_t *Format, wchar_t *Arg0)
 	} while (false);																				
 }
 
-void DemanglerDebugTwoArg(wchar_t *Format, wchar_t *Arg0, wchar_t *Arg1)
+void DemanglerDebugTwoArg(const wchar_t *Format, const wchar_t *Arg0, const wchar_t *Arg1)
 {
 	if (!DEMANGLER_DEBUGLOG_ON)
 		return;
@@ -214,7 +214,7 @@ bool UndecorateSymbolDemangleName(
 		return false;
 	}
 
-	PhUndecoratedName = PhUndecorateNameW(
+	PhUndecoratedName = PhUndecorateSymbolName(
 		obj->m_SymbolProvider,
 		DecoratedName
 	);

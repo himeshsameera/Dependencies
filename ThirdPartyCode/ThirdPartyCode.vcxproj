@@ -56,6 +56,14 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\format_std.cpp" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\http.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\jsonc\json_pointer.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\jsonc\json_visit.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\jsonc\strerror_override.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\mxml\mxml-get.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\theme.c" />
+    <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\wslsup.c" />
     <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\apiimport.c" />
     <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\appresolver.c" />
     <ClCompile Include="$(ThirdPartySourcesDir)\processhacker\phlib\avltree.c" />

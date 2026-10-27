@@ -103,7 +103,7 @@ typedef struct _API_SET_NAMESPACE_V6 {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-typedef struct _API_SET_NAMESPACE {
+typedef struct _DEPENDENCIES_API_SET_NAMESPACE {
 	union
 	{
  		ULONG Version;
@@ -111,7 +111,7 @@ typedef struct _API_SET_NAMESPACE {
 		API_SET_NAMESPACE_V4 ApiSetNameSpaceV4;
 		API_SET_NAMESPACE_V6 ApiSetNameSpaceV6;
 	};
-} API_SET_NAMESPACE, *PAPI_SET_NAMESPACE;
+} DEPENDENCIES_API_SET_NAMESPACE, *PDEPENDENCIES_API_SET_NAMESPACE;
 
 
 #ifdef __cplusplus
