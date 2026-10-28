@@ -34,4 +34,10 @@ winget install -e --id lucasg.Dependencies
 * `Recursive`: Full recursive analysis. Very resource hungry.
 
 ## How to build
-Open the `Dependencies.slnx` using Visual Studio 2026.
+
+### Prerequisites
+
+- Visual Studio 2026
+- [Git](https://git-scm.com/) 2.49 or higher (required for `git clone --revision`)
+
+Open `Dependencies.slnx` using Visual Studio 2026, or run `./build.ps1` in PowerShell.
