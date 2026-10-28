@@ -17,7 +17,8 @@ namespace Dependencies {
 		{
 			x86,
 			x64,
-			WOW64
+			WOW64,
+			ARM64
 		};
 
 		public enum class CLRPH_DEMANGLER

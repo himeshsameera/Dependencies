@@ -28,7 +28,7 @@ namespace ClrPh {
 	private:
 
 		// Hash buffer using bcrypt library
-		static bool HashBuffer(_In_ uint8_t *Buffer, _In_ size_t BufferSize, _In_ wchar_t *HASH_ALGORITHM, _Outptr_ void **Hash, _Out_ size_t *HashSize);
+		static bool HashBuffer(_In_ uint8_t *Buffer, _In_ size_t BufferSize, _In_ const wchar_t *HASH_ALGORITHM, _Outptr_ void **Hash, _Out_ size_t *HashSize);
 		
 		// @return a hex string representing the buffer values, kinda like Python's binascii.hexlify 
 		static String^ GetHexString(_In_ uint8_t *Buffer, _In_ size_t BufferSize);

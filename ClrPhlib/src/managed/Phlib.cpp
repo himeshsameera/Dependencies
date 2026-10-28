@@ -36,7 +36,10 @@ BOOLEAN NTAPI PhEnumDirectoryObjectsCallback(
     _In_opt_ PVOID Context
 )
 {
-	static PH_STRINGREF SectionTypeName = PH_STRINGREF_INIT(L"Section");
+	static PH_STRINGREF SectionTypeName = {
+		sizeof(L"Section") - sizeof(UNICODE_NULL),
+		const_cast<PWSTR>(L"Section")
+	};
 	List<String^>^ ReturnList = ((List<String^>^*) Context)[0];
 
 	if (!PhCompareStringRef(&SectionTypeName, TypeName, TRUE)) {
@@ -55,11 +58,7 @@ List<String^>^ BuildKnownDllList(_In_ bool Wow64Dlls)
 	UNICODE_STRING name;
 	NTSTATUS status;
 	
-	const PWCHAR KnownDllObjectName = (Wow64Dlls) ? L"\\KnownDlls32" : L"\\KnownDlls";
-
-	name.Length = (USHORT) wcslen(KnownDllObjectName) * sizeof(wchar_t);
-	name.MaximumLength = (USHORT) wcslen(KnownDllObjectName) * sizeof(wchar_t);
-	name.Buffer = KnownDllObjectName;
+	RtlInitUnicodeString(&name, Wow64Dlls ? L"\\KnownDlls32" : L"\\KnownDlls");
 	
 
 	InitializeObjectAttributes(
@@ -108,11 +107,11 @@ List<String^>^ Phlib::GetKnownDlls(_In_ bool Wow64Dlls)
 extern "C" {
 #endif
 
-PAPI_SET_NAMESPACE GetApiSetNamespace()
+PDEPENDENCIES_API_SET_NAMESPACE GetApiSetNamespace()
 {
 	ULONG	ReturnLength;
 	PROCESS_BASIC_INFORMATION ProcessInformation;
-	PAPI_SET_NAMESPACE apiSetMap = NULL;
+	PDEPENDENCIES_API_SET_NAMESPACE apiSetMap = NULL;
 
 	//	Retrieve PEB address
 	if (!NT_SUCCESS(NtQueryInformationProcess(
@@ -128,7 +127,7 @@ PAPI_SET_NAMESPACE GetApiSetNamespace()
 
 	//	Parsing PEB structure and locating api set map
 	PPEB peb = static_cast<PPEB>(ProcessInformation.PebBaseAddress);
-	apiSetMap =  static_cast<PAPI_SET_NAMESPACE>(peb->ApiSetMap);
+	apiSetMap =  reinterpret_cast<PDEPENDENCIES_API_SET_NAMESPACE>(peb->ApiSetMap);
 
 	return apiSetMap;
 }
@@ -139,7 +138,7 @@ PAPI_SET_NAMESPACE GetApiSetNamespace()
 
 struct ApiSetSchemaImpl
 {
-    static ApiSetSchema^ ParseApiSetSchema(API_SET_NAMESPACE const * apiSetMap);
+    static ApiSetSchema^ ParseApiSetSchema(DEPENDENCIES_API_SET_NAMESPACE const * apiSetMap);
 
 private:
     // private implementation of ApiSet schema parsing
@@ -331,12 +330,12 @@ ApiSetSchema^ PE::GetApiSetSchema()
     {
         IMAGE_SECTION_HEADER const & section = mappedImage.Sections[n];
         if (strncmp(".apiset", reinterpret_cast<char const*>(section.Name), IMAGE_SIZEOF_SHORT_NAME) == 0)
-            return ApiSetSchemaImpl::ParseApiSetSchema(reinterpret_cast<PAPI_SET_NAMESPACE>(PTR_ADD_OFFSET(mappedImage.ViewBase, section.PointerToRawData)));
+            return ApiSetSchemaImpl::ParseApiSetSchema(reinterpret_cast<PDEPENDENCIES_API_SET_NAMESPACE>(PTR_ADD_OFFSET(mappedImage.ViewBase, section.PointerToRawData)));
     }
     return gcnew EmptyApiSetSchema();
 }
 
-ApiSetSchema^ ApiSetSchemaImpl::ParseApiSetSchema(API_SET_NAMESPACE const * const apiSetMap)
+ApiSetSchema^ ApiSetSchemaImpl::ParseApiSetSchema(DEPENDENCIES_API_SET_NAMESPACE const * const apiSetMap)
 {
 	// Check the returned api namespace is correct
 	if (!apiSetMap)

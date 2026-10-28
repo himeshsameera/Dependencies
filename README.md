@@ -18,7 +18,6 @@ This fork aims to fix bugs and keep the tool working.
 ## How to install
 * Install [Visual C++  Redistributable](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version)
 * Download and extract the binaries from the [latest release](https://github.com/himeshsameera/Dependencies/releases)
-  * Note: If you have ARM, use the `x64` version
 * Use`DependenciesGui.exe` to run the GUI
 * Use `Dependencies.exe` to use it from a console (run `Dependencies.exe -help` to get the usage information)
 
