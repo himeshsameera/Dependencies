@@ -37,6 +37,7 @@ winget install -e --id lucasg.Dependencies
 ### Prerequisites
 
 - Visual Studio 2026
+- .NET Framework 4.8.1 and build tools
 - [Git](https://git-scm.com/) 2.49 or higher (required for `git clone --revision`)
 
 Open `Dependencies.slnx` using Visual Studio 2026, or run `./build.ps1` in PowerShell.
