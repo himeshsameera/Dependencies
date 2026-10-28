@@ -93,6 +93,9 @@ namespace Dependencies
                 case CLRPH_ARCH.x64:
                     mainWindow.Title = "Dependencies (x64)";
                     break;
+                case CLRPH_ARCH.ARM64:
+                    mainWindow.Title = "Dependencies (ARM64)";
+                    break;
                 case CLRPH_ARCH.WOW64:
                     mainWindow.Title = "Dependencies (WoW64)";
                     break;

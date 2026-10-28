@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Path $Destination -Force | Out-Null
 
 Write-Host "Cloning third-party sources into $Destination"
 
-git clone -c advice.detachedHead=false --revision=83299a7b82ab70b0ff3029a2ba9eaac445e1a3be --depth 1 --no-tags https://github.com/processhacker2/processhacker2.git "$Destination/processhacker"
+git clone -c advice.detachedHead=false --revision=6fa25354cf78ba4c35d8725fbe2344bb848a6fd4 --depth 1 --no-tags https://github.com/winsiderss/systeminformer.git "$Destination/processhacker"
 if ($LASTEXITCODE -ne 0) { throw "Cloning Process Hacker failed with exit code $LASTEXITCODE" }
 git -C "$Destination/processhacker" apply --ignore-whitespace --whitespace=nowarn "$PSScriptRoot/ProcessHacker.patch"
 if ($LASTEXITCODE -ne 0) { throw "Applying ProcessHacker.patch failed with exit code $LASTEXITCODE" }

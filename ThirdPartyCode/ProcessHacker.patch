@@ -1,72 +1,8 @@
-diff --git a/phlib/format.c b/phlib/format.c
-index b45fd3843..b7053700e 100644
---- a/phlib/format.c
-+++ b/phlib/format.c
-@@ -45,9 +45,10 @@ extern ULONG PhMaxSizeUnit;
- #define PHP_FORMAT_PAD 0x4
- 
- // Internal CRT routine needed for floating-point conversion
--
-+#if 0
- errno_t __cdecl _cfltcvt_l(double *arg, char *buffer, size_t sizeInBytes,
-     int format, int precision, int caps, _locale_t plocinfo);
-+#endif
- 
- // Keep in sync with PhSizeUnitNames
- static PH_STRINGREF PhpSizeUnitNamesCounted[7] =
-@@ -66,6 +67,7 @@ static WCHAR PhpFormatDecimalSeparator = '.';
- static WCHAR PhpFormatThousandSeparator = ',';
- static _locale_t PhpFormatUserLocale = NULL;
- 
-+#if 0
- #if (_MSC_VER >= 1900)
- 
- // See Source\10.0.10150.0\ucrt\convert\cvt.cpp in SDK v10.
-@@ -93,6 +95,7 @@ static errno_t __cdecl _cfltcvt_l(double *arg, char *buffer, size_t sizeInBytes,
-         format, precision, 0, plocinfo);
- }
- 
-+#endif
- #endif
- 
- // From Source\10.0.10150.0\ucrt\inc\corecrt_internal_stdio_output.h in SDK v10.
-diff --git a/phlib/format_i.h b/phlib/format_i.h
-index 31a577130..e98d3a022 100644
---- a/phlib/format_i.h
-+++ b/phlib/format_i.h
-@@ -311,15 +311,6 @@ CommonInt64Format:
-         \
-         value = (Format)->u.Double; \
-         temp = (PSTR)tempBuffer + 1; /* leave one character so we can insert a prefix if needed */ \
--        _cfltcvt_l( \
--            &value, \
--            temp, \
--            sizeof(tempBuffer) - 1, \
--            c, \
--            precision, \
--            !!((Format)->Type & FormatUpperCase), \
--            PhpFormatUserLocale \
--            ); \
-         \
-         /* if (((Format)->Type & FormatForceDecimalPoint) && precision == 0) */ \
-              /* _forcdecpt_l(tempBufferAnsi, PhpFormatUserLocale); */ \
-diff --git a/phlib/include/mapimg.h b/phlib/include/mapimg.h
-index 95f9a90fa..0979d5254 100644
---- a/phlib/include/mapimg.h
-+++ b/phlib/include/mapimg.h
-@@ -226,6 +226,7 @@ PhGetMappedImageExportFunctionRemote(
-     );
- 
- #define PH_MAPPED_IMAGE_DELAY_IMPORTS 0x1
-+#define PH_MAPPED_IMAGE_DELAY_IMPORTS_V1 0x2
- 
- typedef struct _PH_MAPPED_IMAGE_IMPORTS
- {
 diff --git a/phlib/include/phbase.h b/phlib/include/phbase.h
-index 15ad67e42..3a40f2ac7 100644
+index 910eaff..fe9dfd9 100644
 --- a/phlib/include/phbase.h
 +++ b/phlib/include/phbase.h
-@@ -17,11 +17,17 @@
+@@ -15,7 +15,11 @@
  #define _CRT_SECURE_NO_WARNINGS
  #endif
  
@@ -75,36 +11,15 @@ index 15ad67e42..3a40f2ac7 100644
 +#define PHLIBAPI
 +#elif defined(_PHDLL_)
 +#define PHLIBAPI __declspec(dllexport)
-+#else
-+#if defined(__cplusplus)
++#elif defined(__cplusplus)
  #define PHLIBAPI __declspec(dllimport)
  #else
--#define PHLIBAPI
--#endif
-+#define PHLIBAPI 
-+#endif //  defined(__cplusplus)
-+#endif //  defined(_PHLIB_)
- 
- #include <phnt_windows.h>
- #include <phnt.h>
-diff --git a/phlib/include/phbasesup.h b/phlib/include/phbasesup.h
-index 9b2c871b6..16854f700 100644
---- a/phlib/include/phbasesup.h
-+++ b/phlib/include/phbasesup.h
-@@ -114,7 +114,7 @@ PhGetModuleProcAddress(
- {
-     PVOID module;
- 
--    module = PhGetDllHandle(ModuleName);
-+    module = (HMODULE) PhGetDllHandle(ModuleName);
- 
-     if (module)
-         return PhGetProcedureAddress(module, ProcName, 0);
+ #define PHLIBAPI
 diff --git a/phlib/include/phnativeinl.h b/phlib/include/phnativeinl.h
-index 572dfda47..e5562465b 100644
+index 2decdb1..52927d2 100644
 --- a/phlib/include/phnativeinl.h
 +++ b/phlib/include/phnativeinl.h
-@@ -627,7 +627,7 @@ PhGetJobBasicAndIoAccounting(
+@@ -1142,7 +1142,7 @@ PhGetJobBasicAndIoAccounting(
  {
      return NtQueryInformationJobObject(
          JobHandle,
@@ -113,405 +28,135 @@ index 572dfda47..e5562465b 100644
          BasicAndIoAccounting,
          sizeof(JOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION),
          NULL
-@@ -643,7 +643,7 @@ PhGetJobBasicLimits(
+@@ -1158,7 +1158,7 @@ PhGetJobBasicLimits(
  {
      return NtQueryInformationJobObject(
          JobHandle,
 -        JobObjectBasicLimitInformation,
-+		(JOBOBJECTINFOCLASS) JobObjectBasicLimitInformation,
++        (JOBOBJECTINFOCLASS) JobObjectBasicLimitInformation,
          BasicLimits,
          sizeof(JOBOBJECT_BASIC_LIMIT_INFORMATION),
          NULL
-@@ -659,7 +659,7 @@ PhGetJobExtendedLimits(
+@@ -1174,7 +1174,7 @@ PhGetJobExtendedLimits(
  {
      return NtQueryInformationJobObject(
          JobHandle,
 -        JobObjectExtendedLimitInformation,
-+		(JOBOBJECTINFOCLASS) JobObjectExtendedLimitInformation,
++        (JOBOBJECTINFOCLASS) JobObjectExtendedLimitInformation,
          ExtendedLimits,
          sizeof(JOBOBJECT_EXTENDED_LIMIT_INFORMATION),
          NULL
-@@ -675,7 +675,7 @@ PhGetJobBasicUiRestrictions(
+@@ -1190,7 +1190,7 @@ PhGetJobBasicUiRestrictions(
  {
      return NtQueryInformationJobObject(
          JobHandle,
 -        JobObjectBasicUIRestrictions,
-+		(JOBOBJECTINFOCLASS) JobObjectBasicUIRestrictions,
++        (JOBOBJECTINFOCLASS) JobObjectBasicUIRestrictions,
          BasicUiRestrictions,
          sizeof(JOBOBJECT_BASIC_UI_RESTRICTIONS),
          NULL
-diff --git a/phlib/jsonc/arraylist.c b/phlib/jsonc/arraylist.c
-index 97f2c9217..dc079625e 100644
---- a/phlib/jsonc/arraylist.c
-+++ b/phlib/jsonc/arraylist.c
-@@ -57,6 +57,7 @@ array_list_get_idx(struct array_list *arr, int i)
-   return arr->array[i];
+diff --git a/phlib/include/phsup.h b/phlib/include/phsup.h
+index 2d61081..bdfaa90 100644
+--- a/phlib/include/phsup.h
++++ b/phlib/include/phsup.h
+@@ -278,7 +278,8 @@ FORCEINLINE void *_InterlockedExchangePointer(
+ 
+ #endif
+ 
+-FORCEINLINE LONG_PTR _InterlockedExchangeAddPointer(
++// The ARM64 CRT exports helpers with these names. Keep our wrappers local.
++static FORCEINLINE LONG_PTR _InterlockedExchangeAddPointer(
+     _Inout_ _Interlocked_operand_ LONG_PTR volatile *Addend,
+     _In_ LONG_PTR Value
+     )
+@@ -290,7 +291,7 @@ FORCEINLINE LONG_PTR _InterlockedExchangeAddPointer(
+ #endif
  }
  
-+
- static int array_list_expand_internal(struct array_list *arr, int max)
+-FORCEINLINE LONG_PTR _InterlockedIncrementPointer(
++static FORCEINLINE LONG_PTR _InterlockedIncrementPointer(
+     _Inout_ _Interlocked_operand_ LONG_PTR volatile *Addend
+     )
  {
-   void *t;
-@@ -64,13 +65,18 @@ static int array_list_expand_internal(struct array_list *arr, int max)
- 
-   if(max < arr->size) return 0;
-   new_size = json_max(arr->size << 1, max);
--  if(!(t = realloc(arr->array, new_size*sizeof(void*)))) return -1;
-+  t = realloc(arr->array, new_size*sizeof(void*));
-+  if(!t) {
-+    free(arr->array);
-+    return -1;
-+  }
-   arr->array = (void**)t;
-   (void)memset(arr->array + arr->size, 0, (new_size-arr->size)*sizeof(void*));
-   arr->size = new_size;
-   return 0;
+@@ -301,7 +302,7 @@ FORCEINLINE LONG_PTR _InterlockedIncrementPointer(
+ #endif
  }
  
-+
- int
- array_list_put_idx(struct array_list *arr, int idx, void *data)
+-FORCEINLINE LONG_PTR _InterlockedDecrementPointer(
++static FORCEINLINE LONG_PTR _InterlockedDecrementPointer(
+     _Inout_ _Interlocked_operand_ LONG_PTR volatile *Addend
+     )
  {
 diff --git a/phlib/mapimg.c b/phlib/mapimg.c
-index 8e8da7003..4307e0e4c 100644
+index 6939b32..82475cd 100644
 --- a/phlib/mapimg.c
 +++ b/phlib/mapimg.c
-@@ -372,6 +372,44 @@ PVOID PhMappedImageRvaToVa(
-         );
- }
- 
-+_Must_inspect_result_
-+_Ret_maybenull_
-+PVOID PhMappedImageVaToVa(
-+	_In_ PPH_MAPPED_IMAGE MappedImage,
-+	_In_ ULONG Va,
-+	_Out_opt_ PIMAGE_SECTION_HEADER* Section
-+)
-+{
-+	ULONG rva;
-+	PIMAGE_SECTION_HEADER section;
-+
-+	if (MappedImage->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
-+	{
-+		rva = PtrToUlong(PTR_SUB_OFFSET(Va, MappedImage->NtHeaders32->OptionalHeader.ImageBase));
-+	}
-+	else if (MappedImage->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-+	{
-+		rva = PtrToUlong(PTR_SUB_OFFSET(Va, MappedImage->NtHeaders->OptionalHeader.ImageBase));
-+	}
-+	else
-+	{
-+		return NULL;
-+	}
-+
-+	section = PhMappedImageRvaToSection(MappedImage, rva);
-+
-+	if (!section)
-+		return NULL;
-+
-+	if (Section)
-+		* Section = section;
-+
-+	return PTR_ADD_OFFSET(MappedImage->ViewBase, PTR_ADD_OFFSET(
-+		PTR_SUB_OFFSET(rva, section->VirtualAddress),
-+		section->PointerToRawData
-+	));
-+}
-+
- BOOLEAN PhGetMappedImageSectionName(
-     _In_ PIMAGE_SECTION_HEADER Section,
-     _Out_writes_opt_z_(Count) PWSTR Buffer,
-@@ -656,13 +694,24 @@ NTSTATUS PhGetMappedImageExports(
-         exportDirectory->AddressOfNameOrdinals,
-         NULL
-         );
--
--    if (
--        !Exports->AddressTable ||
--        !Exports->NamePointerTable ||
--        !Exports->OrdinalTable
--        )
--        return STATUS_INVALID_PARAMETER;
-+	
-+	// Exports exist but no AddressTable => ERROR
-+	if (!Exports->AddressTable)
-+	{
-+		return STATUS_INVALID_PARAMETER;
-+	}
-+
-+	// Exports by name exist but no NamePointerTable => ERROR
-+    if ( exportDirectory->NumberOfNames && !Exports->NamePointerTable )
-+	{
-+		return STATUS_INVALID_PARAMETER;
-+	}
-+
-+	// Exports by ordinal exist but no OrdinalTable => ERROR
-+	if ( exportDirectory->NumberOfNames && !Exports->OrdinalTable)
-+	{
-+		return STATUS_INVALID_PARAMETER;
-+	}
- 
-     __try
-     {
-@@ -772,6 +821,11 @@ NTSTATUS PhGetMappedImageExportFunction(
-         return STATUS_PROCEDURE_NOT_FOUND;
- 
-     rva = Exports->AddressTable[Ordinal];
-+	// A non-exported by name ordinal export cannot apparently have a NULL rva
-+	if (!Name && !rva)
-+	{
-+		return STATUS_PROCEDURE_NOT_FOUND;
-+	}
+@@ -923,8 +923,8 @@ NTSTATUS PhGetMappedImageExports(
  
      if (
-         (rva >= Exports->DataDirectory->VirtualAddress) &&
-@@ -967,59 +1021,87 @@ NTSTATUS PhGetMappedImageImportDll(
-     ImportDll->MappedImage = Imports->MappedImage;
-     ImportDll->Flags = Imports->Flags;
- 
--    if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS))
--    {
--        ImportDll->Descriptor = &Imports->DescriptorTable[Index];
--
--        ImportDll->Name = PhMappedImageRvaToVa(
--            ImportDll->MappedImage,
--            ImportDll->Descriptor->Name,
--            NULL
--            );
--
--        if (!ImportDll->Name)
--            return STATUS_INVALID_PARAMETER;
--
--        // TODO: Probe the name.
--
--        if (ImportDll->Descriptor->OriginalFirstThunk)
--        {
--            ImportDll->LookupTable = PhMappedImageRvaToVa(
--                ImportDll->MappedImage,
--                ImportDll->Descriptor->OriginalFirstThunk,
--                NULL
--                );
--        }
--        else
--        {
--            ImportDll->LookupTable = PhMappedImageRvaToVa(
--                ImportDll->MappedImage,
--                ImportDll->Descriptor->FirstThunk,
--                NULL
--                );
--        }
--    }
--    else
--    {
--        ImportDll->DelayDescriptor = &Imports->DelayDescriptorTable[Index];
--
--        ImportDll->Name = PhMappedImageRvaToVa(
--            ImportDll->MappedImage,
--            ImportDll->DelayDescriptor->DllNameRVA,
--            NULL
--            );
--
--        if (!ImportDll->Name)
--            return STATUS_INVALID_PARAMETER;
--
--        // TODO: Probe the name.
--
--        ImportDll->LookupTable = PhMappedImageRvaToVa(
--            ImportDll->MappedImage,
--            ImportDll->DelayDescriptor->ImportNameTableRVA,
--            NULL
--            );
--    }
-+	if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS))
-+	{
-+		ImportDll->Descriptor = &Imports->DescriptorTable[Index];
-+
-+		ImportDll->Name = PhMappedImageRvaToVa(
-+			ImportDll->MappedImage,
-+			ImportDll->Descriptor->Name,
-+			NULL
-+		);
-+
-+		if (!ImportDll->Name)
-+			return STATUS_INVALID_PARAMETER;
-+
-+		// TODO: Probe the name.
-+
-+		if (ImportDll->Descriptor->OriginalFirstThunk)
-+		{
-+			ImportDll->LookupTable = PhMappedImageRvaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->Descriptor->OriginalFirstThunk,
-+				NULL
-+			);
-+		}
-+		else
-+		{
-+			ImportDll->LookupTable = PhMappedImageRvaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->Descriptor->FirstThunk,
-+				NULL
-+			);
-+		}
-+	}
-+	else
-+	{
-+		ImportDll->DelayDescriptor = &Imports->DelayDescriptorTable[Index];
-+
-+		// Backwards compatible support for legacy V1 delay imports. (dmex)
-+		if (ImportDll->DelayDescriptor->Attributes.RvaBased == 0)
-+		{
-+			ImportDll->Flags |= PH_MAPPED_IMAGE_DELAY_IMPORTS_V1;
-+		}
-+
-+		if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS_V1))
-+		{
-+			ImportDll->Name = PhMappedImageRvaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->DelayDescriptor->DllNameRVA,
-+				NULL
-+			);
-+		}
-+		else
-+		{
-+			ImportDll->Name = PhMappedImageVaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->DelayDescriptor->DllNameRVA,
-+				NULL
-+			);
-+		}
-+
-+		if (!ImportDll->Name)
-+			return STATUS_INVALID_PARAMETER;
-+
-+		// TODO: Probe the name.
-+
-+		if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS_V1))
-+		{
-+			ImportDll->LookupTable = PhMappedImageRvaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->DelayDescriptor->ImportNameTableRVA,
-+				NULL
-+			);
-+		}
-+		else
-+		{
-+			ImportDll->LookupTable = PhMappedImageVaToVa(
-+				ImportDll->MappedImage,
-+				ImportDll->DelayDescriptor->ImportNameTableRVA,
-+				NULL
-+			);
-+		}
-+	}
- 
-     if (!ImportDll->LookupTable)
+         !Exports->AddressTable ||
+-        !Exports->NamePointerTable ||
+-        !Exports->OrdinalTable
++        (exportDirectory->NumberOfNames && !Exports->NamePointerTable) ||
++        (exportDirectory->NumberOfNames && !Exports->OrdinalTable)
+         )
          return STATUS_INVALID_PARAMETER;
-@@ -1113,11 +1195,22 @@ NTSTATUS PhGetMappedImageImportEntry(
-         }
-         else
-         {
--            importByName = PhMappedImageRvaToVa(
--                ImportDll->MappedImage,
--                entry.u1.AddressOfData,
--                NULL
--                );
-+			if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS_V1))
-+			{
-+				importByName = PhMappedImageRvaToVa(
-+					ImportDll->MappedImage,
-+					entry.u1.AddressOfData,
-+					NULL
-+				);
-+			}
-+			else
-+			{
-+				importByName = PhMappedImageVaToVa(
-+					ImportDll->MappedImage,
-+					entry.u1.AddressOfData,
-+					NULL
-+				);
-+			}
-         }
-     }
-     else if (ImportDll->MappedImage->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-@@ -1136,11 +1229,22 @@ NTSTATUS PhGetMappedImageImportEntry(
-         }
-         else
-         {
--            importByName = PhMappedImageRvaToVa(
--                ImportDll->MappedImage,
--                (ULONG)entry.u1.AddressOfData,
--                NULL
--                );
-+			if (!(ImportDll->Flags & PH_MAPPED_IMAGE_DELAY_IMPORTS_V1))
-+			{
-+				importByName = PhMappedImageRvaToVa(
-+					ImportDll->MappedImage,
-+					(ULONG)entry.u1.AddressOfData,
-+					NULL
-+				);
-+			}
-+			else
-+			{
-+				importByName = PhMappedImageVaToVa(
-+					ImportDll->MappedImage,
-+					(ULONG)entry.u1.AddressOfData,
-+					NULL
-+				);
-+			}
-         }
-     }
-     else
-@@ -1688,7 +1792,7 @@ NTSTATUS PhGetMappedImageResources(
-                 Resources->ResourceEntries[resourceIndex].Type = NAME_FROM_RESOURCE_ENTRY(resourceDirectory, resourceType);
-                 Resources->ResourceEntries[resourceIndex].Name = NAME_FROM_RESOURCE_ENTRY(resourceDirectory, resourceName);
-                 Resources->ResourceEntries[resourceIndex].Language = NAME_FROM_RESOURCE_ENTRY(resourceDirectory, resourceLanguage);
--                Resources->ResourceEntries[resourceIndex].Data = PhMappedImageRvaToVa(MappedImage, resourceData->OffsetToData, NULL);
-+				Resources->ResourceEntries[resourceIndex].Data = PhMappedImageRvaToVa(MappedImage, resourceData->OffsetToData, NULL);
-                 Resources->ResourceEntries[resourceIndex++].Size = resourceData->Size;
-             }
-         }
+ 
+@@ -1038,6 +1038,10 @@ NTSTATUS PhGetMappedImageExportFunction(
+ 
+     rva = Exports->AddressTable[Ordinal];
+ 
++    // Ignore holes in an ordinal-only export table.
++    if (!Name && !rva)
++        return STATUS_PROCEDURE_NOT_FOUND;
++
+     if (
+         (rva >= Exports->DataDirectory->VirtualAddress) &&
+         (rva < Exports->DataDirectory->VirtualAddress + Exports->DataDirectory->Size)
+diff --git a/phlib/symprv.c b/phlib/symprv.c
+index 399b218..3d737a9 100644
+--- a/phlib/symprv.c
++++ b/phlib/symprv.c
+@@ -275,7 +275,9 @@ VOID PhpSymbolProviderCompleteInitialization(
+         PPH_STRING dbghelpName;
+         PPH_STRING symsrvName;
+ 
+-#ifdef _WIN64
++#if defined(_M_ARM64)
++        PhMoveReference(&winsdkPath, PhConcatStringRefZ(&winsdkPath->sr, L"\\Debuggers\\arm64\\"));
++#elif defined(_WIN64)
+         PhMoveReference(&winsdkPath, PhConcatStringRefZ(&winsdkPath->sr, L"\\Debuggers\\x64\\"));
+ #else
+         PhMoveReference(&winsdkPath, PhConcatStringRefZ(&winsdkPath->sr, L"\\Debuggers\\x86\\"));
 diff --git a/phnt/include/ntexapi.h b/phnt/include/ntexapi.h
-index f39ecbd00..21662bab5 100644
+index 3703379..169f7d8 100644
 --- a/phnt/include/ntexapi.h
 +++ b/phnt/include/ntexapi.h
-@@ -3570,7 +3570,7 @@ C_ASSERT(FIELD_OFFSET(KUSER_SHARED_DATA, SystemCallPad) == 0x310);
- C_ASSERT(FIELD_OFFSET(KUSER_SHARED_DATA, TickCount) == 0x320);
- C_ASSERT(FIELD_OFFSET(KUSER_SHARED_DATA, TickCountQuad) == 0x320);
- C_ASSERT(FIELD_OFFSET(KUSER_SHARED_DATA, XState) == 0x3d8);
--C_ASSERT(sizeof(KUSER_SHARED_DATA) == 0x708);
-+//C_ASSERT(sizeof(KUSER_SHARED_DATA) == 0x708);
- 
- #define USER_SHARED_DATA ((KUSER_SHARED_DATA * const)0x7ffe0000)
- 
-@@ -3594,7 +3594,9 @@ FORCEINLINE ULONGLONG NtGetTickCount64()
+@@ -4116,7 +4116,9 @@ FORCEINLINE ULONGLONG NtGetTickCount64()
          if (tickCount.HighPart == (ULONG)USER_SHARED_DATA->TickCount.High2Time)
              break;
  
--        YieldProcessor();
 +#ifndef _MANAGED
-+		YieldProcessor();
-+#endif // !_MANAGED
+         YieldProcessor();
++#endif
      }
  
  #endif
-@@ -3621,7 +3623,10 @@ FORCEINLINE ULONG NtGetTickCount()
+@@ -4143,7 +4145,9 @@ FORCEINLINE ULONG NtGetTickCount()
          if (tickCount.HighPart == (ULONG)USER_SHARED_DATA->TickCount.High2Time)
              break;
  
--        YieldProcessor();
 +#ifndef _MANAGED
-+		YieldProcessor();
-+#endif // !_MANAGED
-+        
+         YieldProcessor();
++#endif
      }
  
      return (ULONG)((UInt32x32To64(tickCount.LowPart, USER_SHARED_DATA->TickCountMultiplier) >> 24) +
 diff --git a/phnt/include/ntioapi.h b/phnt/include/ntioapi.h
-index 158e3b091..025bb42de 100644
+index b015567..a93da8a 100644
 --- a/phnt/include/ntioapi.h
 +++ b/phnt/include/ntioapi.h
-@@ -680,6 +680,7 @@ typedef struct _FILE_ID_EXTD_BOTH_DIR_INFORMATION
+@@ -761,6 +761,7 @@ typedef struct _FILE_ID_EXTD_BOTH_DIR_INFORMATION
      WCHAR FileName[1];
  } FILE_ID_EXTD_BOTH_DIR_INFORMATION, *PFILE_ID_EXTD_BOTH_DIR_INFORMATION;
  
@@ -519,59 +164,20 @@ index 158e3b091..025bb42de 100644
  // private
  typedef struct _FILE_STAT_INFORMATION
  {
-@@ -711,6 +712,8 @@ typedef struct _FILE_MEMORY_PARTITION_INFORMATION
-     } Flags;
- } FILE_MEMORY_PARTITION_INFORMATION, *PFILE_MEMORY_PARTITION_INFORMATION;
+@@ -820,6 +821,8 @@ typedef struct _FILE_CASE_SENSITIVE_INFORMATION
+     ULONG Flags;
+ } FILE_CASE_SENSITIVE_INFORMATION, *PFILE_CASE_SENSITIVE_INFORMATION;
  
 +#endif
 +
  // NtQueryDirectoryFile types
  
  typedef struct _FILE_DIRECTORY_INFORMATION
-diff --git a/phnt/include/ntpebteb.h b/phnt/include/ntpebteb.h
-index 7114a1bb7..ffeef6be1 100644
---- a/phnt/include/ntpebteb.h
-+++ b/phnt/include/ntpebteb.h
-@@ -134,7 +134,7 @@ typedef struct _PEB
-     PVOID *FlsCallback;
-     LIST_ENTRY FlsListHead;
-     PVOID FlsBitmap;
--    ULONG FlsBitmapBits[FLS_MAXIMUM_AVAILABLE / (sizeof(ULONG) * 8)];
-+    ULONG FlsBitmapBits[FLS_MAXIMUM_AVAILABLE_OLD / (sizeof(ULONG) * 8)];
-     ULONG FlsHighIndex;
- 
-     PVOID WerRegistrationData;
-diff --git a/phnt/include/ntpsapi.h b/phnt/include/ntpsapi.h
-index 513505172..b6761fea5 100644
---- a/phnt/include/ntpsapi.h
-+++ b/phnt/include/ntpsapi.h
-@@ -55,7 +55,7 @@ typedef ULONG GDI_HANDLE_BUFFER[GDI_HANDLE_BUFFER_SIZE];
- typedef ULONG GDI_HANDLE_BUFFER32[GDI_HANDLE_BUFFER_SIZE32];
- typedef ULONG GDI_HANDLE_BUFFER64[GDI_HANDLE_BUFFER_SIZE64];
- 
--#define FLS_MAXIMUM_AVAILABLE 128
-+#define FLS_MAXIMUM_AVAILABLE_OLD 128
- #define TLS_MINIMUM_AVAILABLE 64
- #define TLS_EXPANSION_SLOTS 1024
- 
-diff --git a/phnt/include/ntwow64.h b/phnt/include/ntwow64.h
-index 4317ab0fb..881efd714 100644
---- a/phnt/include/ntwow64.h
-+++ b/phnt/include/ntwow64.h
-@@ -341,7 +341,7 @@ typedef struct _PEB32
-     WOW64_POINTER(PVOID *) FlsCallback;
-     LIST_ENTRY32 FlsListHead;
-     WOW64_POINTER(PVOID) FlsBitmap;
--    ULONG FlsBitmapBits[FLS_MAXIMUM_AVAILABLE / (sizeof(ULONG) * 8)];
-+    ULONG FlsBitmapBits[FLS_MAXIMUM_AVAILABLE_OLD / (sizeof(ULONG) * 8)];
-     ULONG FlsHighIndex;
- 
-     WOW64_POINTER(PVOID) WerRegistrationData;
 diff --git a/phnt/include/phnt_ntdef.h b/phnt/include/phnt_ntdef.h
-index 36cc781b4..93f911d92 100644
+index 95d48ae..f4aa5a7 100644
 --- a/phnt/include/phnt_ntdef.h
 +++ b/phnt/include/phnt_ntdef.h
-@@ -71,7 +71,9 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
+@@ -91,7 +91,9 @@ typedef LARGE_INTEGER PHYSICAL_ADDRESS, *PPHYSICAL_ADDRESS;
  
  // Functions
  

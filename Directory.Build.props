@@ -18,8 +18,8 @@
 
     <!-- C# projects -->
     <LangVersion>latest</LangVersion>
-    <TargetFramework>net472</TargetFramework>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFramework>net481</TargetFramework>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <Platforms>x64;x86;ARM64</Platforms>
     <WarningLevel>9999</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -62,6 +62,7 @@
   <!-- C++ projects -->
   <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)' == '.vcxproj'">
     <ClCompile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WarningLevel>Level4</WarningLevel>
