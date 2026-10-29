@@ -80,19 +80,20 @@ BuildAndTest Release ARM64
 BuildAndTest Debug ARM64
 
 Info "Download Process Hacker binaries"
-$processHackerDir = "$buildDir/processhacker-2.39-bin"
-Invoke-WebRequest -Uri "https://sourceforge.net/projects/processhacker/files/processhacker2/processhacker-2.39-bin.zip/download" `
-                  -UserAgent "Wget" `
+$processHackerDir = "$buildDir/processhacker-bin"
+Invoke-WebRequest -Uri "https://github.com/winsiderss/systeminformer/releases/download/v4.0.26241.138/systeminformer-4.0.26241.138-bin.zip" `
                   -OutFile "$processHackerDir.zip"
 Expand-Archive -LiteralPath "$processHackerDir.zip" -DestinationPath $processHackerDir -Force
 
-foreach ($platform in @("x64", "x86", "ARM64")) {
+foreach ($pair in @(@("x64", "amd64"), @("x86", "i386"), @("ARM64", "arm64"))) {
+  $platform, $processHackerPlatform = $pair
+
   $archiveName = "$buildDir/dependencies_v${version}_$platform.zip"
   Info "Create zip archive '$archiveName'"
-  # PE Viewer runs as a separate process; use its x64 build under ARM64 emulation.
-  $peViewerPlatform = if ($platform -eq 'ARM64') { 'x64' } else { $platform }
+
   $files = @(Get-ChildItem -Path "$buildDir/$platform/Release/DependenciesGui/*" -File -Exclude "*.pdb"
-             Get-Item -LiteralPath "$processHackerDir/$peViewerPlatform/peview.exe")
+             Get-Item -LiteralPath "$processHackerDir/$processHackerPlatform/peview.exe")
+
   Compress-Archive -LiteralPath $files.FullName `
                    -DestinationPath $archiveName `
                    -Force
