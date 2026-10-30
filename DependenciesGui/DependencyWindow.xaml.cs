@@ -1354,15 +1354,20 @@ namespace Dependencies
             }
 
             string programPath = Dependencies.Properties.Settings.Default.PeViewerPath;
+            if (!string.IsNullOrEmpty(programPath) && !Path.IsPathRooted(programPath))
+            {
+                programPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, programPath);
+            }
+
             if (!File.Exists(programPath))
             {
-                MessageBox.Show(String.Format("{0:s} file could not be found !", programPath));
+                MessageBox.Show($"{programPath} file could not be found !");
                 return;
             }
 
             Process PeviewerProcess = new Process();
-            PeviewerProcess.StartInfo.FileName = String.Format("\"{0:s}\"", programPath);
-            PeviewerProcess.StartInfo.Arguments = String.Format("\"{0:s}\"", selectedModuleFilePath);
+            PeviewerProcess.StartInfo.FileName = programPath;
+            PeviewerProcess.StartInfo.Arguments = $"\"{selectedModuleFilePath}\"";
             PeviewerProcess.Start();
         }
 

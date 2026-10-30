@@ -399,6 +399,11 @@ namespace Dependencies
         public bool OpenPeviewer(object Module)
         {
             string programPath = Dependencies.Properties.Settings.Default.PeViewerPath;
+            if (!string.IsNullOrEmpty(programPath) && !Path.IsPathRooted(programPath))
+            {
+                programPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, programPath);
+            }
+
             Process PeviewerProcess = new Process();
         
             if ((Module == null))
@@ -408,7 +413,7 @@ namespace Dependencies
 
             if (!File.Exists(programPath))
             {
-                MessageBox.Show("peview.exe file could not be found !");
+                MessageBox.Show($"{programPath} file could not be found !");
                 return false;
             }
 
@@ -419,7 +424,7 @@ namespace Dependencies
             }
 
             PeviewerProcess.StartInfo.FileName = programPath;
-            PeviewerProcess.StartInfo.Arguments = Filepath;
+            PeviewerProcess.StartInfo.Arguments = $"\"{Filepath}\"";
             return PeviewerProcess.Start();
         }
 
