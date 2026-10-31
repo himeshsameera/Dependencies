@@ -48,7 +48,7 @@ Function BuildAndTest($configuration, $platform) {
               /property:Platform=$platform `
               -verbosity:minimal `
               --logger:"console;verbosity=normal" `
-              $root/Test/Test.csproj `
+              $root/src/Test/Test.csproj `
               -- RunConfiguration.TreatNoTestsAsError=true
   CheckReturnCodeOfPreviousCommand "tests failed"
 }

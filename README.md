@@ -2,7 +2,7 @@
 Modern rewrite of [Dependency Walker](http://www.dependencywalker.com/).<br>
 Shows dependencies of executables and DLLs, together with their imports and exports.<br>
 It is a great tool for finding which DLLs are needed by a specific executable.<br>
-<img src="screenshots/GuiWindow.png" width="70%" height="70%"/>
+<img src="doc/GuiWindow.png" width="70%" height="70%"/>
 
 ## Limitations
 * Requires Windows 10 or higher
